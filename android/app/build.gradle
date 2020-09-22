@@ -28,7 +28,9 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     //buildToolsVersion '26.0.3'
-    //compileSdkVersion 28
+
+    // Modified
+    compileSdkVersion 30
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -42,7 +44,9 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.bus_project"
         minSdkVersion 16
-        //targetSdkVersion 28
+
+        // Modified
+        targetSdkVersion 30
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
