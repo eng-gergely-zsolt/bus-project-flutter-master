@@ -15,8 +15,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import '../Shared/list.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:bus_project/models/bus_data.dart';
-
-// import 'package:google_maps_flutter/';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Maps extends StatefulWidget {
   final Todo todo;
@@ -50,7 +49,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     mapController = MapController();
-    GeoPosition.getLocation();
+    gGeoPosition.getLocation();
 
     if (todo != null)
       SchedulerBinding.instance.addPostFrameCallback((_) => _animatedMapMove(
@@ -70,10 +69,10 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
     // There is no selected bus.
     if(selectedBusId != "Off") {
-      if (lineList != null) {
+      if (gLineList != null) {
 
         // selectedLine Line variable contains the lineId and the list of stations of a selected bus
-        selectedLine = lineList.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
+        selectedLine = gLineList.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
 
 
         if (selectedLine != null && selectedLine.stationList.length != 0) {
@@ -160,7 +159,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
       if (_timer == null) {
         _timer = Timer.periodic(Duration(seconds: 30), (_) async {
           BusInformationListPost temp = await getBusInformationList();
-          bus_list = temp.busList;
+          gBusList = temp.busList;
           circleMarkers.clear();
           setState(() {
             markers = updateMarkers();
@@ -192,8 +191,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   Polyline linesDrawerFirstHalf() {
     List<LatLng> temp3 = new List<LatLng>();
     Trace line;
-    if (traceList != null) {
-      line = traceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
+    if (gTraceList != null) {
+      line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
       if(line != null && line.pointList.length != 0) {
         int half=(line.pointList.length/2).floor();
         temp3 = line.pointList.sublist(0,half+1).map((poi) {
@@ -208,8 +207,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   Polyline linesDrawerLastHalf() {
     List<LatLng> temp3 = new List<LatLng>();
     Trace line;
-    if (traceList != null) {
-      line = traceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
+    if (gTraceList != null) {
+      line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
       if(line != null || line.pointList.length != 0) {
         int half=(line.pointList.length/2).floor();
         temp3 = line.pointList.sublist(half).map((poi) {
@@ -224,9 +223,9 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
   List<Marker> updateMarkers() {
     List<Marker> temp2;
-    if (bus_list != null) {
+    if (gBusList != null) {
 //      print("Update markers 111111, maps.dart, line 198");
-      temp2 = bus_list.map((bus) {
+      temp2 = gBusList.map((bus) {
         return Marker(
           width: 30.0,
           height: 30.0,
@@ -242,15 +241,15 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
         );
       }).toList();
 
-      if (GeoPosition.userLocation != null) {
+      if (gGeoPosition.userLocation != null) {
         /// SET TIMER IF THERE IS A USER LOCATION
 //        print("Update markers 22222222, maps.dart, line 217");
-        if(MyBusId == null) {
+        if(gMyBusId == null) {
           temp2.add(new Marker(
             width: 30.0,
             height: 30.0,
-            point: new LatLng(GeoPosition.userLocation.latitude,
-                GeoPosition.userLocation.longitude),
+            point: new LatLng(gGeoPosition.userLocation.latitude,
+                gGeoPosition.userLocation.longitude),
             builder: (ctx) =>
             new Container(
               child: Icon(
@@ -263,22 +262,22 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
           temp2.add(new Marker(
             width: 30.0,
             height: 30.0,
-            point: new LatLng(GeoPosition.userLocation.latitude,
-                GeoPosition.userLocation.longitude),
+            point: new LatLng(gGeoPosition.userLocation.latitude,
+                gGeoPosition.userLocation.longitude),
             builder: (ctx) =>
             new Container(
               child: new CircleAvatar(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.red,
                   child:
-                  new Text(MyBusId)),
+                  new Text(gMyBusId)),
             ),
           ));
         }
         circleMarkers = <CircleMarker>[
           CircleMarker(
-              point: new LatLng(GeoPosition.userLocation.latitude,
-                  GeoPosition.userLocation.longitude),
+              point: new LatLng(gGeoPosition.userLocation.latitude,
+                  gGeoPosition.userLocation.longitude),
               color: Colors.blue.withOpacity(0.4),
               useRadiusInMeter: true,
               radius: (range * 1000)
@@ -310,12 +309,12 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
         );
       }).toList();
 
-      if (GeoPosition.userLocation != null) {
+      if (gGeoPosition.userLocation != null) {
         temp2.add(new Marker(
           width: 30.0,
           height: 30.0,
-          point: new LatLng(GeoPosition.userLocation.latitude,
-              GeoPosition.userLocation.longitude),
+          point: new LatLng(gGeoPosition.userLocation.latitude,
+              gGeoPosition.userLocation.longitude),
           builder: (ctx) => new Container(
             child: Icon(
               MdiIcons.mapMarker,
@@ -325,8 +324,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
         ));
         circleMarkers = <CircleMarker>[
           CircleMarker(
-              point: new LatLng(GeoPosition.userLocation.latitude,
-                  GeoPosition.userLocation.longitude),
+              point: new LatLng(gGeoPosition.userLocation.latitude,
+                  gGeoPosition.userLocation.longitude),
               color: Colors.blue.withOpacity(0.4),
               useRadiusInMeter: true,
               radius: (range * 1000)
@@ -384,13 +383,13 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     currentContext = context;
     double buttonSize = ((MediaQuery.of(context).size.width-20)/4);
-    var list = businfo_list.map((var value) {
+    var list = gBusDataList.map((var value) {
       return new DropdownMenuItem<String>(
         value: value.busId,
         child: new ListTile(
           leading: new CircleAvatar(
               foregroundColor: Colors.white,
-              backgroundColor: (value.busId == MyBusId)?Colors.red:Colors.blue,
+              backgroundColor: (value.busId == gMyBusId)?Colors.red:Colors.blue,
               child: new Text(value.busId)),
           title: Text(value.busName),
         ),
@@ -405,7 +404,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
       ),
     ));
 
-    return (GeoPosition.userLocation == null)
+    return (gGeoPosition.userLocation == null)
         ? Scaffold(
         body: Center(
             child: Column(
@@ -430,15 +429,15 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                   new SizedBox(
                     width: buttonSize,//80.0,
                     child: RaisedButton(
-                      child: (MyBusId==null)?Text(AppLocalizations.of(context).translate('map_btn_start_journey')):Text(MyBusId),//Text('Center'),
-                      highlightColor: MyBusId==null?Color(0xFF42A5F5):Colors.redAccent,
+                      child: (gMyBusId==null)?Text(AppLocalizations.of(context).translate('map_btn_start_journey')):Text(gMyBusId),//Text('Center'),
+                      highlightColor: gMyBusId==null?Color(0xFF42A5F5):Colors.redAccent,
                       shape: new RoundedRectangleBorder(
                           borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(color: MyBusId==null?Colors.blue:Colors.red)),
-                      textColor: MyBusId==null?Colors.blue:Colors.red,
+                          side: BorderSide(color: gMyBusId==null?Colors.blue:Colors.red)),
+                      textColor: gMyBusId==null?Colors.blue:Colors.red,
                       color: Colors.white70,
                       onPressed: () {
-                        if(MyBusId==null)
+                        if(gMyBusId==null)
                           tabController.animateTo(0);
                       },
                     ),
@@ -527,8 +526,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                       onPressed: () {
                         var bounds = LatLngBounds();
                         bounds.extend(
-                          new LatLng(GeoPosition.userLocation.latitude,
-                              GeoPosition.userLocation.longitude),
+                          new LatLng(gGeoPosition.userLocation.latitude,
+                              gGeoPosition.userLocation.longitude),
                         );
                         mapController.fitBounds(
                           bounds,

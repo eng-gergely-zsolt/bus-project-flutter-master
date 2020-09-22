@@ -9,29 +9,33 @@ import 'package:bus_project/models/line.dart';
 import 'package:bus_project/models/station.dart';
 import 'package:bus_project/models/timetable.dart';
 
-List<BusInformation> bus_list;
-List<Bus> businfo_list;
+import 'package:flutter_map/flutter_map.dart';
+
+
+List<BusInformation> gBusList;
+List<Bus> gBusDataList;
 List<Station> gStationList;
-
-List<Line> lineList;
-List<Trace> traceList;
-
-List<ArrivalTime> arrivaltime_list;
+List<Line> gLineList;
+List<Trace> gTraceList;
+List<ArrivalTime> gArrivalTimeList;
 List<Timetable> gTimetable;
-//double range = 0.15;
-double range = 150;
-int bus_list_size;
-BuildContext currentContext;
-ActivityRecognition DrivingDetector = ActivityRecognition();
-GPS GeoPosition = GPS();
 
 int next;
+int gBusListSize;
+double range = 150;
+String gStationText = "No stations nearby";
+bool gNearStation = false;
+String gMyBusId;
+
+BuildContext currentContext;
+ActivityRecognition gDrivingDetector = ActivityRecognition();
+GPS gGeoPosition = GPS();
+Duration gServerClientDifference;
+
 Line actualLine;
 Entry actualStation;
 Entry nextStation;
 Stopwatch stopwatch;
 
-Duration ServerClientDifference = null;
-String stationText = "No stations nearby";
-bool nearStation = false;
-String MyBusId;
+
+

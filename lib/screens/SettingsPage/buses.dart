@@ -13,13 +13,13 @@ class BusesScreen extends StatelessWidget {
       ),
       body: Center(
           child: ListView.builder(
-              itemCount: arrivaltime_list.length,
+              itemCount: gArrivalTimeList.length,
               itemBuilder: (context, index) {
                 return ListTile(
                     leading: new CircleAvatar(
                         child:
-                        new Text(arrivaltime_list.elementAt(index).busID)),
-                    title: Text(arrivaltime_list.elementAt(index).toString()));
+                        new Text(gArrivalTimeList.elementAt(index).busID)),
+                    title: Text(gArrivalTimeList.elementAt(index).toString()));
               })),
     );
   }

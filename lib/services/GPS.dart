@@ -62,18 +62,18 @@ class GPS {
         return false;
       });
       if (detected) {
-        nearStation = true;
-        stationText = AppLocalizations.of(currentContext).translate('gps_you_are_at')/*"You are at: "*/ + nearbyStations.first.stationName;
+        gNearStation = true;
+        gStationText = AppLocalizations.of(currentContext).translate('gps_you_are_at')/*"You are at: "*/ + nearbyStations.first.stationName;
         getArrivalTimeList(int.parse(nearbyStations.first.stationId))
-            .then((val) => arrivaltime_list = val.arrivalTimeList);
+            .then((val) => gArrivalTimeList = val.arrivalTimeList);
       } else {
-        nearStation = false;
-        stationText = AppLocalizations.of(currentContext).translate('settings_nostation');//"No sations nearby";
-        if (arrivaltime_list != null && arrivaltime_list.length > 0)
-          arrivaltime_list.clear();
+        gNearStation = false;
+        gStationText = AppLocalizations.of(currentContext).translate('settings_nostation');//"No sations nearby";
+        if (gArrivalTimeList != null && gArrivalTimeList.length > 0)
+          gArrivalTimeList.clear();
       }
 
-      if (MyBusId != null) {
+      if (gMyBusId != null) {
         if (detected) {
           /*if (nextStation == null) {
             actualStation = actualLine.Stations.firstWhere((entry s) {
@@ -112,19 +112,19 @@ class GPS {
             }
           }*/
         }
-        if (DrivingDetector.DrivingScore >= 40) {
+        if (gDrivingDetector.DrivingScore >= 40) {
           var post = {
-            'BusId': MyBusId,
+            'BusId': gMyBusId,
             'Actual_Latitude': userLocation.latitude,
             'Actual_Longitude': userLocation.longitude,
             'Position_Accuracy': userLocation.accuracy,
             'Actual_Speed': userLocation.speed,
             'Speed_Accuracy': userLocation.speedAccuracy,
             'Direction': userLocation.heading,
-            'Acceleration': DrivingDetector.accelerometerValues,
-            'Gyroscope': DrivingDetector.gyroscopeValues,
+            'Acceleration': gDrivingDetector.accelerometerValues,
+            'Gyroscope': gDrivingDetector.gyroscopeValues,
             'Timestamp': DateTime.now()
-                .add(ServerClientDifference)
+                .add(gServerClientDifference)
                 .toString()
                 .split(".")[0]
           };
@@ -134,8 +134,8 @@ class GPS {
           if (!questionSent) {
             questionSent = true;
             Timer(Duration(seconds: 60), () {
-              if (DrivingDetector.DrivingScore < 40 &&
-                  !DrivingDetector.activeSubscription.isPaused) {
+              if (gDrivingDetector.DrivingScore < 40 &&
+                  !gDrivingDetector.activeSubscription.isPaused) {
                 _showQuestion();
               }
             });
@@ -150,20 +150,20 @@ class GPS {
     _getLocation().then((position) {
       userLocation = position;
 //      print("/*/*/*/SENDING DATA TO SERVER");
-      if (MyBusId != null && ServerClientDifference !=  null) {
-        if (DrivingDetector.DrivingScore >= 40) {
+      if (gMyBusId != null && gServerClientDifference !=  null) {
+        if (gDrivingDetector.DrivingScore >= 40) {
           var post = {
-            'BusId': MyBusId,
+            'BusId': gMyBusId,
             'Actual_Latitude': userLocation.latitude,
             'Actual_Longitude': userLocation.longitude,
             'Position_Accuracy': userLocation.accuracy,
             'Actual_Speed': userLocation.speed,
             'Speed_Accuracy': userLocation.speedAccuracy,
             'Direction': userLocation.heading,
-            'Acceleration': DrivingDetector.accelerometerValues,
-            'Gyroscope': DrivingDetector.gyroscopeValues,
+            'Acceleration': gDrivingDetector.accelerometerValues,
+            'Gyroscope': gDrivingDetector.gyroscopeValues,
             'Timestamp': DateTime.now()
-                .add(ServerClientDifference)
+                .add(gServerClientDifference)
                 .toString()
                 .split(".")[0]
           };
@@ -181,7 +181,7 @@ class GPS {
 
   void _showQuestion() {
     // flutter defined function
-    if (MyBusId != null)
+    if (gMyBusId != null)
       showDialog(
         barrierDismissible: false,
         context: currentContext,
@@ -203,12 +203,12 @@ class GPS {
               new FlatButton(
                 child: new Text(AppLocalizations.of(context).translate('gps_stop_location_stop')),//Text("Stop"),
                 onPressed: () {
-                  MyBusId = null;
+                  gMyBusId = null;
                   questionSent = false;
                   nextStation = null;
                   actualStation = null;
                   actualLine = null;
-                  DrivingDetector.pauseDrivingDetection();
+                  gDrivingDetector.pauseDrivingDetection();
                   appBloc.updateTitle();
                   appBloc.updateFab();
                   BackgroundFetch.stop().then((int status) {

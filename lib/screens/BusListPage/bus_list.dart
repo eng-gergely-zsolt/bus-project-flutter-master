@@ -32,14 +32,14 @@ class _BusListActionListener extends State<Buslist1> {
   void initState() {
     super.initState();
 
-    if (businfo_list == null) {
+    if (gBusDataList == null) {
       getBusList().then((val) => setState(() {
-        businfo_list = val.vBusList;
+        gBusDataList = val.vBusList;
       }));
     }
-    if (bus_list == null) {
+    if (gBusList == null) {
       getBusInformationList().then((val) => setState(() {
-        bus_list = val.busList;
+        gBusList = val.busList;
       }));
     }
 
@@ -54,9 +54,9 @@ class _BusListActionListener extends State<Buslist1> {
     }
 
 
-    if (lineList == null) {
+    if (gLineList == null) {
       getLineList().then((val) => setState(() {
-        lineList = val.lineList;
+        gLineList = val.lineList;
 
 //        print(lineList);
 //        print('bus_list.dart, line 51');
@@ -64,9 +64,9 @@ class _BusListActionListener extends State<Buslist1> {
     }
 
 
-    if (traceList == null) {
+    if (gTraceList == null) {
       getTraceList().then((val) => setState(() {
-        traceList = val.traceList;
+        gTraceList = val.traceList;
 
 //        print(traceList[2]);
 //        print('bus_list.dart, line 60');
@@ -84,21 +84,21 @@ class _BusListActionListener extends State<Buslist1> {
     }
 
 
-    if (ServerClientDifference == null) {
+    if (gServerClientDifference == null) {
       synchronization().then((serverTime) {
 //        print(serverTime);
-        ServerClientDifference = DateTime.now()
+        gServerClientDifference = DateTime.now()
             .difference(serverTime); //I guess this doesn't need refresh so...
 //        print(ServerClientDifference);
       });}
 
-    GeoPosition.getLocation();
+    gGeoPosition.getLocation();
   }
 
   @override
   Widget build(BuildContext context) {
     currentContext = context;
-    return businfo_list == null
+    return gBusDataList == null
         ? Scaffold(
         body: Center(
             child: Column(mainAxisAlignment: MainAxisAlignment.center,
@@ -106,17 +106,17 @@ class _BusListActionListener extends State<Buslist1> {
                 ///new
                 children: <Widget>[CircularProgressIndicator()])))
         : ListView.builder(
-      itemCount: businfo_list.length,
+      itemCount: gBusDataList.length,
       itemBuilder: (context, index) {
-        Bus item = businfo_list[index];
+        Bus item = gBusDataList[index];
         return Dismissible(
           key: Key(item.busId),
           direction: DismissDirection.endToStart,
           confirmDismiss: (DismissDirection dir){
             if(dir == DismissDirection.endToStart){
 //                    print("right swap");
-              BusInformation bus =bus_list.firstWhere((x){
-                return businfo_list.elementAt(index).busId == x.busId;
+              BusInformation bus =gBusList.firstWhere((x){
+                return gBusDataList.elementAt(index).busId == x.busId;
               },orElse: () => null);
               if(bus != null) {
                 Todo coords = Todo(
@@ -151,18 +151,18 @@ class _BusListActionListener extends State<Buslist1> {
           child: ListTile(
             leading: new CircleAvatar(
                 foregroundColor: Colors.white,
-                backgroundColor: (item.busId == MyBusId)?Colors.red:Colors.blue,
-                child: new Text(businfo_list.elementAt(index).busId)),
-            title: Text(businfo_list.elementAt(index).busName),
+                backgroundColor: (item.busId == gMyBusId)?Colors.red:Colors.blue,
+                child: new Text(gBusDataList.elementAt(index).busId)),
+            title: Text(gBusDataList.elementAt(index).busName),
             trailing: Icon(Icons.keyboard_arrow_right),
             onTap: () {
 //                    print("Rovid gomb nyomas");
-              _startJourney(businfo_list.elementAt(index).busId);
+              _startJourney(gBusDataList.elementAt(index).busId);
             },
             onLongPress: () {
 //                    print("Hosszu gomb nyomas");
               if (gTimetable != null) {
-                String busid = businfo_list.elementAt(index).busId;
+                String busid = gBusDataList.elementAt(index).busId;
                 if(gTimetable.firstWhere((o) => o.busNr == busid, orElse: () => null) != null)//singleWhere((o) => o.busNr == busid, orElse: () => null) != null)
                   Navigator.push(
                     context,
@@ -194,17 +194,17 @@ class _BusListActionListener extends State<Buslist1> {
               child: new Text(AppLocalizations.of(context).translate('yes')),//Text("yes"),
               onPressed: () {
                 setState(() {
-                  MyBusId = busId;
+                  gMyBusId = busId;
                   BackgroundFetch.start().then((int status) {
 //                    print('[BackgroundFetch] start success: $status');
                   }).catchError((e) {
 //                    print('[BackgroundFetch] start FAILURE: $e');
                   });
-                  actualLine = lineList.firstWhere((Line l) {
+                  actualLine = gLineList.firstWhere((Line l) {
                     return l.lineId.toString() == busId;
                   }, orElse: () => null);
-                  if (!DrivingDetector.isStarted)
-                    DrivingDetector.startDrivingDetection();
+                  if (!gDrivingDetector.isStarted)
+                    gDrivingDetector.startDrivingDetection();
                   appBloc.updateTitle();
                   appBloc.updateFab();
                   Navigator.of(context).pop();

@@ -42,7 +42,7 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
 //      print('[BackgroundFetch] Event received');
       setState(() {
         _events.insert(0, new DateTime.now());
-        GeoPosition.sendPositionOnce();
+        gGeoPosition.sendPositionOnce();
       });
       // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
       // for taking too long in the background.
@@ -90,15 +90,15 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
           initialData: "Main Dart",
           builder: (context, snapshot) {
             return Visibility(
-              visible: MyBusId == null ? false : true,
+              visible: gMyBusId == null ? false : true,
               child: FloatingActionButton.extended(
                 onPressed: () {
                   setState(() {
-                    MyBusId = null;
+                    gMyBusId = null;
                     nextStation = null;
                     actualStation = null;
                     actualLine = null;
-                    DrivingDetector.pauseDrivingDetection();
+                    gDrivingDetector.pauseDrivingDetection();
                     BackgroundFetch.stop().then((int status) {
 //                        print('[BackgroundFetch] stop success: $status');
                     });
@@ -120,7 +120,7 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
                 stream: appBloc.titleStream,
                 initialData: "Main Dart",
                 builder: (context, snapshot) {
-                  return MyBusId == null
+                  return gMyBusId == null
                       ? Text(AppLocalizations.of(context).translate('settings_select_bus'),
                     style: TextStyle(
                         color: Colors.white,
@@ -128,7 +128,7 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold
                     ),)//Text("Please select the bus you are traveling with:")
-                      : Text(AppLocalizations.of(context).translate('settings_selected_bus')/*"Your bus is:"*/ + MyBusId,
+                      : Text(AppLocalizations.of(context).translate('settings_selected_bus')/*"Your bus is:"*/ + gMyBusId,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,

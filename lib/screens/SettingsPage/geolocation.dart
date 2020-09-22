@@ -8,7 +8,7 @@ import 'package:bus_project/models/line.dart';
 import 'buses.dart';
 import 'package:background_fetch/background_fetch.dart';
 
-class settings {
+class Settings {
   LocationAccuracy ac;
   String tm = '';
   String di = '';
@@ -22,10 +22,10 @@ class GeoListenPage extends StatefulWidget {
 
 class _GeoListenPageState extends State<GeoListenPage> {
   bool condition = false;
-  Timer Refresh;
+  Timer refresh;
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  settings newSettings = new settings();
+  Settings newSettings = new Settings();
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
         setState(() {});
       }
     });
-    GeoPosition.getLocation();
+    gGeoPosition.getLocation();
   }
 
   void dispose() {
@@ -60,9 +60,9 @@ class _GeoListenPageState extends State<GeoListenPage> {
       //print('timeInt: ${newSettings.tm}');
 
       setState(() {
-        GeoPosition.accuracy = newSettings.ac;
-        GeoPosition.timeInt = int.parse(newSettings.tm);
-        GeoPosition.distance = int.parse(newSettings.di);
+        gGeoPosition.accuracy = newSettings.ac;
+        gGeoPosition.timeInt = int.parse(newSettings.tm);
+        gGeoPosition.distance = int.parse(newSettings.di);
         range = (int.parse(newSettings.sr) / 1000.toDouble());
         //state.didChange(newValue); ////////////
       });
@@ -125,12 +125,12 @@ class _GeoListenPageState extends State<GeoListenPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  GeoPosition.userLocation == null
+                  gGeoPosition.userLocation == null
                       ? CircularProgressIndicator()
                       : Text(AppLocalizations.of(context).translate('settings_location')/*"Location:"*/ +
-                      GeoPosition.userLocation.latitude.toString() +
+                      gGeoPosition.userLocation.latitude.toString() +
                       " " +
-                      GeoPosition.userLocation.longitude.toString(),
+                      gGeoPosition.userLocation.longitude.toString(),
                     style: TextStyle(fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic,
                         fontSize: 20),
@@ -140,8 +140,8 @@ class _GeoListenPageState extends State<GeoListenPage> {
                     padding: const EdgeInsets.only(top: 38.0),
                     child: RaisedButton(
                       onPressed: () {
-                        if (arrivaltime_list != null &&
-                            arrivaltime_list.length > 0) {
+                        if (gArrivalTimeList != null &&
+                            gArrivalTimeList.length > 0) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -171,16 +171,16 @@ class _GeoListenPageState extends State<GeoListenPage> {
                     ),
                   ),
                   new Padding(padding: EdgeInsets.only(top: 20)),
-                  Text(stationText,
+                  Text(gStationText,
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold
                     ),),
                   new Padding(padding: EdgeInsets.only(top: 15)),
-                  DrivingDetector.userActivity == null
+                  gDrivingDetector.userActivity == null
                       ? CircularProgressIndicator()
                       : Text(
-                    AppLocalizations.of(context).translate('settings_driving_score')+/*"Your phone is to*/" ${DrivingDetector.userActivity.confidence}% ${DrivingDetector.userActivity.type}! Driving Score= ${DrivingDetector.DrivingScore}",
+                    AppLocalizations.of(context).translate('settings_driving_score')+/*"Your phone is to*/" ${gDrivingDetector.userActivity.confidence}% ${gDrivingDetector.userActivity.type}! Driving Score= ${gDrivingDetector.DrivingScore}",
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold
@@ -226,7 +226,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         DropdownButton<LocationAccuracy>(
-                          value: GeoPosition.accuracy,
+                          value: gGeoPosition.accuracy,
                           style: new TextStyle(
                               fontStyle: FontStyle.italic,
                               fontSize: 15,
@@ -254,7 +254,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                             setState(() {
                               //print(newValue.toString());
                               newSettings.ac = newValue;
-                              GeoPosition.accuracy = newValue;
+                              gGeoPosition.accuracy = newValue;
                             });
                           },
                         ),
@@ -277,7 +277,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           ),//"Interval in seconds"),
                           //controller: IntervalController,
                           keyboardType: TextInputType.number,
-                          initialValue: GeoPosition.timeInt.toString(),
+                          initialValue: gGeoPosition.timeInt.toString(),
                           validator: (value) {
                             if (value.isEmpty) {
                               return AppLocalizations.of(context).translate('settings_from_empty');//'If you want to save the settings you must provide information.';
@@ -309,7 +309,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           //controller: DistanceController,
                           keyboardType: TextInputType.number,
                           cursorColor: Colors.blue,
-                          initialValue: GeoPosition.distance.toString(),
+                          initialValue: gGeoPosition.distance.toString(),
                           validator: (value) {
                             if (value.isEmpty) {
                               return AppLocalizations.of(context).translate('settings_from_empty');//'If you want to save the settings you must provide information.';
