@@ -13,8 +13,8 @@ class ActivityRecognition {
   List<double> gyroscopeValues;
   List<double> userAccelerometerValues;
   List<StreamSubscription> streamSubscriptions;
-  int DrivingScore = 0;
-  Timer DrivingCheck;
+  int drivingScore = 0;
+  Timer drivingCheck;
   bool isStarted = false;
 
   ActivityRecognition._internal() {
@@ -33,7 +33,7 @@ class ActivityRecognition {
     streamSubscriptions.forEach((StreamSubscription s) {
       s.cancel();
     });
-    DrivingCheck.cancel();
+    drivingCheck.cancel();
   }
 
   void startDrivingDetection() {
@@ -50,21 +50,21 @@ class ActivityRecognition {
 //          print("Your phone is to ${action.confidence}% ${action.type}!");
           /*
             "IN_VEHICLE""ON_BICYCLE""ON_FOOT""RUNNING""STILL""TILTING""UNKNOWN" "WALKING""UNDEFINED"*/
-          if (action.type == "IN_VEHICLE") DrivingScore = 100;
-          if (action.type == "ON_BICYCLE") DrivingScore = 0;
-          if (action.type == "ON_FOOT") DrivingScore = 0;
-          if (action.type == "RUNNING") DrivingScore = 0;
-          if (action.type == "WALKING") DrivingScore = 0;
+          if (action.type == "IN_VEHICLE") drivingScore = 100;
+          if (action.type == "ON_BICYCLE") drivingScore = 0;
+          if (action.type == "ON_FOOT") drivingScore = 0;
+          if (action.type == "RUNNING") drivingScore = 0;
+          if (action.type == "WALKING") drivingScore = 0;
         });
       }
     }
 
-    Timer.periodic(Duration(seconds: 2), (DrivingTimer) {  //Something is fishy with this
-      DrivingCheck =DrivingTimer;
-      if (userActivity.type == "STILL" && DrivingScore > 0) DrivingScore -= 1;
-      if (userActivity.type == "TILTING" && DrivingScore > 0) DrivingScore -= 1;
-      if (userActivity.type == "UNDEFINED" && DrivingScore > 0)
-        DrivingScore -= 1;
+    Timer.periodic(Duration(seconds: 2), (drivingTimer) {  //Something is fishy with this
+      drivingCheck =drivingTimer;
+      if (userActivity.type == "STILL" && drivingScore > 0) drivingScore -= 1;
+      if (userActivity.type == "TILTING" && drivingScore > 0) drivingScore -= 1;
+      if (userActivity.type == "UNDEFINED" && drivingScore > 0)
+        drivingScore -= 1;
     });
 
     if (streamSubscriptions.length < 3) {
@@ -88,7 +88,7 @@ class ActivityRecognition {
   void pauseDrivingDetection() {
     isStarted = false;
 //    print("PAUSE DRIVING DETECTION");
-    DrivingCheck.cancel();
+    drivingCheck.cancel();
     activeSubscription.pause();
   }
 }

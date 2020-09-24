@@ -9,16 +9,16 @@ import 'package:bus_project/screens/BusListPage/bus_list.dart';
 import 'list.dart';
 
 TabController tabController;
-class start extends StatefulWidget {
+class Start extends StatefulWidget {
   @override
-  _newBar createState() => new _newBar();
+  NewBar createState() => new NewBar();
 }
 
-class _newBar extends State<start> with SingleTickerProviderStateMixin {
+class NewBar extends State<Start> with SingleTickerProviderStateMixin {
 
-  bool _enabled = true;
+  bool pEnabled = true;
   List<DateTime> _events = [];
-  int _status = 0;
+  int pStatus = 0;
 
   //Future<Post> post;
   @override
@@ -50,18 +50,18 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
     }).then((int status) {
 //      print('[BackgroundFetch] configure success: $status');
       setState(() {
-        _status = status;
+        pStatus = status;
       });
     }).catchError((e) {
 //      print('[BackgroundFetch] configure ERROR: $e');
       setState(() {
-        _status = e;
+        pStatus = e;
       });
     });
     // Optionally query the current BackgroundFetch status.
     int status = await BackgroundFetch.status;
     setState(() {
-      _status = status;
+      pStatus = status;
     });
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -157,7 +157,7 @@ class _newBar extends State<start> with SingleTickerProviderStateMixin {
         controller: tabController,
         physics: NeverScrollableScrollPhysics(),
         children: [
-          Buslist1(),
+          BusList1(),
           Maps(),
           GeoListenPage(),
         ]);

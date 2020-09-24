@@ -68,7 +68,7 @@ class GPS {
             .then((val) => gArrivalTimeList = val.arrivalTimeList);
       } else {
         gNearStation = false;
-        gStationText = AppLocalizations.of(currentContext).translate('settings_nostation');//"No sations nearby";
+        gStationText = AppLocalizations.of(currentContext).translate('settings_no_station');//"No stations nearby";
         if (gArrivalTimeList != null && gArrivalTimeList.length > 0)
           gArrivalTimeList.clear();
       }
@@ -112,7 +112,7 @@ class GPS {
             }
           }*/
         }
-        if (gDrivingDetector.DrivingScore >= 40) {
+        if (gDrivingDetector.drivingScore >= 40) {
           var post = {
             'BusId': gMyBusId,
             'Actual_Latitude': userLocation.latitude,
@@ -134,7 +134,7 @@ class GPS {
           if (!questionSent) {
             questionSent = true;
             Timer(Duration(seconds: 60), () {
-              if (gDrivingDetector.DrivingScore < 40 &&
+              if (gDrivingDetector.drivingScore < 40 &&
                   !gDrivingDetector.activeSubscription.isPaused) {
                 _showQuestion();
               }
@@ -151,7 +151,7 @@ class GPS {
       userLocation = position;
 //      print("/*/*/*/SENDING DATA TO SERVER");
       if (gMyBusId != null && gServerClientDifference !=  null) {
-        if (gDrivingDetector.DrivingScore >= 40) {
+        if (gDrivingDetector.drivingScore >= 40) {
           var post = {
             'BusId': gMyBusId,
             'Actual_Latitude': userLocation.latitude,
@@ -250,7 +250,6 @@ class GPS {
 
   void getLocation() async {
     _getLocation().then((position) {
-      /// Ha facebook akkor nem megy | youtube sem megy | ha lezarodik akkor nem biztos...
       userLocation = position;
     });
   }

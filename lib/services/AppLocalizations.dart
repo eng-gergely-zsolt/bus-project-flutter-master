@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 class AppLocalizations{
   final Locale locale;
-  Map<String,String> _LocalizedStrings;
+  Map<String,String> _localizedStrings;
   static const LocalizationsDelegate<AppLocalizations> delegate =
   _AppLocalizationsDelegate();
 
@@ -19,14 +19,14 @@ class AppLocalizations{
     String jsonString = await rootBundle.loadString('lang/${locale.languageCode}.json');
 
     Map<String,dynamic> jsonMap = json.decode(jsonString);
-    _LocalizedStrings = jsonMap.map((key,value){
+    _localizedStrings = jsonMap.map((key,value){
       return MapEntry(key,value.toString());
     });
     return true;
   }
 
   String translate(String key){
-    return _LocalizedStrings[key];
+    return _localizedStrings[key];
   }
 }
 

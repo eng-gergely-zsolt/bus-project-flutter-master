@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         }
         return supportedLocales.first;
       },
-      home: start(),
+      home: Start(),
     );
   }
 }

@@ -12,19 +12,19 @@ import 'package:bus_project/services/communication.dart';
 import 'timetable.dart';
 
 class Todo {
-  String BusId;
-  double Actual_Latitude;
-  double Actual_Longitude;
+  String busId;
+  double actualLatitude;
+  double actualLongitude;
 
-  Todo(this.BusId, this.Actual_Latitude, this.Actual_Longitude);
+  Todo(this.busId, this.actualLatitude, this.actualLongitude);
 }
 
-class Buslist1 extends StatefulWidget {
+class BusList1 extends StatefulWidget {
   @override
   _BusListActionListener createState() => new _BusListActionListener();
 }
 
-class _BusListActionListener extends State<Buslist1> {
+class _BusListActionListener extends State<BusList1> {
   //List<int> bus_name = list();
   //Map<int, String> _list_map = list_map();
 
@@ -112,6 +112,7 @@ class _BusListActionListener extends State<Buslist1> {
         return Dismissible(
           key: Key(item.busId),
           direction: DismissDirection.endToStart,
+          // ignore: missing_return
           confirmDismiss: (DismissDirection dir){
             if(dir == DismissDirection.endToStart){
 //                    print("right swap");
@@ -156,18 +157,18 @@ class _BusListActionListener extends State<Buslist1> {
             title: Text(gBusDataList.elementAt(index).busName),
             trailing: Icon(Icons.keyboard_arrow_right),
             onTap: () {
-//                    print("Rovid gomb nyomas");
+//                    print("Short button push");
               _startJourney(gBusDataList.elementAt(index).busId);
             },
             onLongPress: () {
-//                    print("Hosszu gomb nyomas");
+//                    print("Ling button push");
               if (gTimetable != null) {
-                String busid = gBusDataList.elementAt(index).busId;
-                if(gTimetable.firstWhere((o) => o.busNr == busid, orElse: () => null) != null)//singleWhere((o) => o.busNr == busid, orElse: () => null) != null)
+                String busId = gBusDataList.elementAt(index).busId;
+                if(gTimetable.firstWhere((o) => o.busNr == busId, orElse: () => null) != null)//singleWhere((o) => o.busNr == busId, orElse: () => null) != null)
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TimetableScreen(busid),
+                      builder: (context) => TimetableScreen(busId),
                     ),
                   );
               }

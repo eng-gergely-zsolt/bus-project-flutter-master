@@ -53,7 +53,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
     if (todo != null)
       SchedulerBinding.instance.addPostFrameCallback((_) => _animatedMapMove(
-          LatLng(todo.Actual_Latitude, todo.Actual_Longitude), 17.0));
+          LatLng(todo.actualLatitude, todo.actualLongitude), 17.0));
 
     if (circleMarkers == null) circleMarkers = List<CircleMarker>();
   }
@@ -62,7 +62,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
   LayerOptions filterStations() {
     bool blue = false;
-    bool notFirst = false;
+    // bool notFirst = false;
     Line selectedLine;
     List<int> endStationsOfSelectedBus;
     List<Station> filteredStationList;
@@ -140,7 +140,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
           return new MarkerLayerOptions(markers: markers);
         }
         else{
-          print('faszom');
+          print('dick');
         }
       }
     }
@@ -164,7 +164,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
           setState(() {
             markers = updateMarkers();
 
-            /// kETSZER HIVODIK MEG MAJD VEDD KI EZT MERT UGY IS MEG CSINALJA
+            //It is called two times.
           });
         });
       }

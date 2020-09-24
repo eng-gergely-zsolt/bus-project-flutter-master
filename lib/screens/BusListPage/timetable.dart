@@ -82,6 +82,7 @@ class TimetableScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Text(gStationList.firstWhere((Station s) {
+                      // ignore: unrelated_type_equality_checks
                       if (s.stationId == actualTimetable1.elementAt(0).stationID)
                         return true;
                       return false;
@@ -98,6 +99,7 @@ class TimetableScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Text(gStationList.firstWhere((Station s) {
+                      // ignore: unrelated_type_equality_checks
                       if (s.stationId == actualTimetable2.elementAt(0).stationID)
                         return true;
                       return false;

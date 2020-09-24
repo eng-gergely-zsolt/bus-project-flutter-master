@@ -1,12 +1,12 @@
 import 'package:bus_project/services/AppLocalizations.dart';
-import 'package:bus_project/services/AppPropertiesBLoC.dart';
+// import 'package:bus_project/services/AppPropertiesBLoC.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'package:bus_project/screens/Shared/list.dart';
-import 'package:bus_project/models/line.dart';
+// import 'package:bus_project/models/line.dart';
 import 'buses.dart';
-import 'package:background_fetch/background_fetch.dart';
+// import 'package:background_fetch/background_fetch.dart';
 
 class Settings {
   LocationAccuracy ac;
@@ -31,9 +31,9 @@ class _GeoListenPageState extends State<GeoListenPage> {
   void initState() {
     super.initState();
     condition = false;
-    Timer.periodic(Duration(seconds: 2), (Refresh) {
+    Timer.periodic(Duration(seconds: 2), (refresh) {
       if (condition) {
-        Refresh.cancel();
+        refresh.cancel();
       } else {
         setState(() {});
       }
@@ -75,15 +75,15 @@ class _GeoListenPageState extends State<GeoListenPage> {
         new SnackBar(backgroundColor: color, content: new Text(message)));
   }
 
-  void _showDialog(String Title, String Message) {
+  void _showDialog(String title, String message) {
     // flutter defined function
     showDialog(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text(Title),
-          content: new Text(Message),
+          title: new Text(title),
+          content: new Text(message),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
@@ -102,7 +102,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
   Widget build(BuildContext context) {
     currentContext = context;
     /*
-    var list = businfo_list.map((var value) {
+    var list = bus_info_list.map((var value) {
       return new DropdownMenuItem<String>(
         value: value.BusId,
         child: new Text(value.BusId),
@@ -150,10 +150,10 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           );
                         } else {
                           _showDialog(
-                              AppLocalizations.of(context).translate('settings_nostation')/*"No station nearby!"*/,
-                              AppLocalizations.of(context).translate('settings_yesstation_1')+//"You need to be at most " +
+                              AppLocalizations.of(context).translate('settings_no_station')/*"No station nearby!"*/,
+                              AppLocalizations.of(context).translate('settings_yes_station_1')+//"You need to be at most " +
                                   (range * 1000).toString() +
-                                  AppLocalizations.of(context).translate('settings_yesstation_2'));//    " meters away from a station to check for buses.");
+                                  AppLocalizations.of(context).translate('settings_yes_station_2'));//    " meters away from a station to check for buses.");
                         }
                       },
                       shape: new RoundedRectangleBorder(
@@ -161,7 +161,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           side: BorderSide(color: Colors.white10)),
                       color: Colors.white,
                       child: Text(
-                        AppLocalizations.of(context).translate('settings_btn_showbus'),//"Show buses",
+                        AppLocalizations.of(context).translate('settings_btn_show_bus'),//"Show buses",
                         style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
@@ -180,7 +180,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                   gDrivingDetector.userActivity == null
                       ? CircularProgressIndicator()
                       : Text(
-                    AppLocalizations.of(context).translate('settings_driving_score')+/*"Your phone is to*/" ${gDrivingDetector.userActivity.confidence}% ${gDrivingDetector.userActivity.type}! Driving Score= ${gDrivingDetector.DrivingScore}",
+                    AppLocalizations.of(context).translate('settings_driving_score')+/*"Your phone is to*/" ${gDrivingDetector.userActivity.confidence}% ${gDrivingDetector.userActivity.type}! Driving Score= ${gDrivingDetector.drivingScore}",
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold
@@ -321,7 +321,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                         new Padding(padding: EdgeInsets.only(top: 20)),
                         TextFormField(
                           decoration: new InputDecoration(
-                            labelText: AppLocalizations.of(context).translate('settings_tff_stationrange'),
+                            labelText: AppLocalizations.of(context).translate('settings_tff_station_range'),
                             labelStyle: TextStyle(
                                 color: Colors.blue
                             ),
