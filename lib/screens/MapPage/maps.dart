@@ -7,7 +7,6 @@ import 'package:bus_project/models/trace.dart';
 import 'package:bus_project/screens/Shared/start.dart';
 import 'package:bus_project/services/AppLocalizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 import 'package:bus_project/screens/BusListPage/bus_list.dart';
 import 'package:bus_project/services/communication.dart';
@@ -15,7 +14,8 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import '../Shared/list.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:bus_project/models/bus_data.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+
 
 class Maps extends StatefulWidget {
   final Todo todo;
@@ -122,6 +122,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ):Marker(
               // width: 40.0,
               // height: 40.0,
+
               point: new LatLng(element.latitude, element.longitude),
               builder: (ctx) =>
                   Container(
@@ -129,7 +130,9 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                       child: IconButton(
                           icon: Icon(MdiIcons.mapMarker,
                             color: Colors.yellow,
-                            size: 40.0,),
+                            // size: 40.0,
+
+                          ),
                           //color: Colors.white,
                           onPressed: () {
                             Scaffold.of(currentContext).showSnackBar(
@@ -153,8 +156,9 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
     markers = null;
     if (circleMarkers != null)
       circleMarkers.clear(); //<-This might be dangerous...
+
     if (selectedLayer == 0) {
-//      print("LAYER SELECTED >> BUSES, maps.dart, line 128");
+     print("LAYER SELECTED >> BUSES, maps.dart, line 128");
       markers = updateMarkers();
       if (_timer == null) {
         _timer = Timer.periodic(Duration(seconds: 30), (_) async {
@@ -168,7 +172,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
           });
         });
       }
-    } else if (selectedLayer == 1) {
+    }
+    else if (selectedLayer == 1) {
       print("Layer selected >> LINES, maps.dart, line 143");
       if (_timer != null) {
         _timer.cancel();
@@ -176,9 +181,10 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
       }
       polyLines = new List<Polyline>();
       markers = null;
+
       if(selectedBusId != "Off") {
         polyLines.add(linesDrawerFirstHalf());
-        polyLines.add(linesDrawerLastHalf());
+        // polyLines.add(linesDrawerLastHalf());
       }
     }
     if (markers != null) {
@@ -189,19 +195,19 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   }
 
   Polyline linesDrawerFirstHalf() {
-    List<LatLng> temp3 = new List<LatLng>();
+    List<LatLng> tempLinePoints = new List<LatLng>();
     Trace line;
     if (gTraceList != null) {
       line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
       if(line != null && line.pointList.length != 0) {
-        int half=(line.pointList.length/2).floor();
-        temp3 = line.pointList.sublist(0,half+1).map((poi) {
+        int half =(line.pointList.length/2).floor();
+        tempLinePoints = line.pointList.sublist(0,half + 1).map((poi) {
           return new LatLng(poi.latitude, poi.longitude);
         }).toList();
       }
     }
 //    print('$temp3, maps.dart, line 174');
-    return Polyline(points: temp3, strokeWidth: 4.0, color: Colors.blue);
+    return Polyline(points: tempLinePoints, strokeWidth: 4.0, color: Colors.blue);
   }
 
   Polyline linesDrawerLastHalf() {
@@ -222,36 +228,50 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   }
 
   List<Marker> updateMarkers() {
-    List<Marker> temp2;
+    List<Marker> vTempMarker;
     if (gBusList != null) {
-//      print("Update markers 111111, maps.dart, line 198");
-      temp2 = gBusList.map((bus) {
+      // print(gBusList);
+
+      // vTempMarker = gBusList.map((bus) {
+      //   vTempMarker.add(new Marker(
+      //     width: 30.0,
+      //     height: 30.0,
+      //     point: new LatLng(bus.actualLatitude, bus.actualLongitude),
+      //     builder: (ctx) => Container(
+      //       // key: Key('purple'),
+      //       child: new CircleAvatar(
+      //           foregroundColor: Colors.white,
+      //           backgroundColor: Colors.blue,
+      //           // (bus.pointsNearby>=0)?Colors.green:Colors.amber,
+      //           child: new Text(bus.busId)),
+      //     ),
+      //   ));
+      // }).toList();
+      vTempMarker = gBusList.map((bus) {
         return Marker(
           width: 30.0,
           height: 30.0,
           point: new LatLng(bus.actualLatitude, bus.actualLongitude),
           builder: (ctx) => Container(
             key: Key('purple'),
-            child:  new CircleAvatar(
+            child: new CircleAvatar(
                 foregroundColor: Colors.white,
-                backgroundColor: (bus.pointsNearby>=0)?Colors.green:Colors.amber,
-                child:
-                new Text(bus.busId)),
+                // backgroundColor: Colors.blue,
+                backgroundColor: (bus.pointsNearby != null)?Colors.green:Colors.amber,
+                child: new Text(bus.busId)),
           ),
         );
       }).toList();
 
+      // Location of user
       if (gGeoPosition.userLocation != null) {
         /// SET TIMER IF THERE IS A USER LOCATION
-//        print("Update markers 22222222, maps.dart, line 217");
         if(gMyBusId == null) {
-          temp2.add(new Marker(
+          vTempMarker.add(new Marker(
             width: 30.0,
             height: 30.0,
-            point: new LatLng(gGeoPosition.userLocation.latitude,
-                gGeoPosition.userLocation.longitude),
-            builder: (ctx) =>
-            new Container(
+            point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+            builder: (ctx) => new Container(
               child: Icon(
                   MdiIcons.mapMarker,
                   color: Colors.blueGrey
@@ -259,18 +279,15 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ),
           ));
         }else{
-          temp2.add(new Marker(
+          vTempMarker.add(new Marker(
             width: 30.0,
             height: 30.0,
-            point: new LatLng(gGeoPosition.userLocation.latitude,
-                gGeoPosition.userLocation.longitude),
-            builder: (ctx) =>
-            new Container(
+            point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+            builder: (ctx) => new Container(
               child: new CircleAvatar(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.red,
-                  child:
-                  new Text(gMyBusId)),
+                  child: new Text(gMyBusId)),
             ),
           ));
         }
@@ -285,7 +302,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
         ];
       }
     }
-    return temp2;
+    return vTempMarker;
   }
 
   List<Marker> stationMarkers() {
@@ -344,6 +361,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
     }
   }
 
+
+
   void _animatedMapMove(LatLng destLocation, double destZoom) {
     // Create some tweens. These serve to split up the transition from one location to another.
     // In our case, we want to split the transition be<tween> our current map center and the destination.
@@ -378,6 +397,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
     controller.forward();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -425,6 +446,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
 
+
+
                   // Start journey button
                   new SizedBox(
                     width: buttonSize,//80.0,
@@ -468,8 +491,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                         setState(() {
                           selectedLayer = 0;
                           toggleBus = true;
-                          toggleStation = false;
                           toggleLine = false;
+                          toggleStation = false;
                         },);},),),
 
 
@@ -502,8 +525,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                         setState(() {
                           selectedLayer = 1;
                           toggleBus = false;
-                          toggleStation = false;
                           toggleLine = true;
+                          toggleStation = false;
                         },);},),),
 
 
@@ -511,7 +534,6 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                   // Center button
                   new SizedBox(
                     width: buttonSize,
-                    // Center button.
                     child: RaisedButton(
                       child: Text(AppLocalizations.of(context).translate('map_btn_center')),
                       highlightColor: Color(0xFF42A5F5),
@@ -541,7 +563,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ),
 
 
-
+            // Child: dropdown list
             Visibility(
               child:new DropdownButton<String>(
                 isExpanded: true,
@@ -559,36 +581,29 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ),
 
 
-
+            // Map child
             Flexible(
               child: FlutterMap(
                 mapController: mapController,
                 options: new MapOptions(
-//                        center: new LatLng(GeoPosition.userLocation.latitude,
-//                            GeoPosition.userLocation.longitude),
-
-                  center: new LatLng(46.53, 24.56),
-
+                  center: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+                  // center: new LatLng(46.53, 24.56),
                   zoom: 18.0,
                 ),
 
                 layers: [
                   new TileLayerOptions(
-//                          urlTemplate: "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}@2x.png?access_token={accessToken}",
-//                          additionalOptions: {
-//                            'accessToken': 'pk.eyJ1IjoiY29zbWFjcmlzdGlhbiIsImEiOiJjanc2dDI0d3gxZmFhNDRvNmoyMWhsZTFxIn0.rJO6tjQsfjOWi_vQmnz5jw',
-//                            'id': 'mapbox.streets',
-//                          },
-                    urlTemplate: 'https://api.mapbox.com/styles/v1/geergely-zsolt/ckdtu5rys0ff919o13hnmawa4/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2VlcmdlbHktenNvbHQiLCJhIjoiY2tkdHNqbmxqMWw5MTMwb2R0djcxMXdrcSJ9.FjR4wOzpMGOb2jKx0YxLHA',
+                    urlTemplate:
+                    // Streets view of map.
+                    'https://api.mapbox.com/styles/v1/geergely-zsolt/ckfgpaks82fqe19pnlit6xbby/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ2VlcmdlbHktenNvbHQiLCJhIjoiY2tkdHNqbmxqMWw5MTMwb2R0djcxMXdrcSJ9.FjR4wOzpMGOb2jKx0YxLHA',
+
                     additionalOptions: {
-                      'accessToken': 'pk.eyJ1IjoiZ2VlcmdlbHktenNvbHQiLCJhIjoiY2tkdHcyaWhwMWdvZzJxbXNxOXR3dGp6biJ9._riJutYjswKZdWgFx5bkSw',
+                      'accessToken': 'pk.eyJ1IjoiZ2VlcmdlbHktenNvbHQiLCJhIjoiY2tkdHNqbmxqMWw5MTMwb2R0djcxMXdrcSJ9.FjR4wOzpMGOb2jKx0YxLHA',
                       'id': 'mapbox.mapbox.streets-v8',
                     },),
                   switchLayers(),
                   filterStations(),
                 ],),),
-
-
           ],
         ),
       ),

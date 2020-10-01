@@ -73,6 +73,7 @@ Future<PostStationList> getStationList() async {
 
 
 Future<PostArrivalTimeList> getArrivalTimeList(int stationID) async {
+  // "http://192.168.1.7:8080/WCFService/Service1/web/GetArrivalTimeList?StationID="
   // "http://192.168.0.220:8080/WCFService/Service1/web/GetArrivalTimeList?StationID="
   // "http://193.226.0.198:5210/WCFService/Service1/web/GetTimeList?StationID="
   final response =
@@ -121,6 +122,7 @@ Future<PostTraceList> getTraceList() async {
 
 
 void postBusInformation(Map body) async {
+  // "http://192.168.1.7:8080/WCFService/Service1/web/PostBusInformation"
   // "http://192.168.0.220:8080/WCFService/Service1/web/PostBusInformation"
   // 'http://193.226.0.198:5210/WCFService/Service1/web/PostBusInformation'
   return http.post("http://192.168.1.7:8080/WCFService/Service1/web/PostBusInformation",
@@ -138,6 +140,7 @@ void postBusInformation(Map body) async {
 
 
 void postBusInformationTest(Map body) async {
+  // "http://192.168.1.7:8080/WCFService/Service1/web/PostBusMeasurement"
   // "http://192.168.0.220:8080/WCFService/Service1/web/PostBusMeasurement"
   // "http://193.226.0.198:5210/WCFService/Service1/web/PostBusMeasurement"
   return http.post("http://192.168.1.7:8080/WCFService/Service1/web/PostBusMeasurement",
