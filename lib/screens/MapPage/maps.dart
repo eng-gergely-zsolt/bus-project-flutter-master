@@ -194,14 +194,16 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
     }
   }
 
+
+  // Draw the first half of the route on the map from BusTrace table.
   Polyline linesDrawerFirstHalf() {
     List<LatLng> tempLinePoints = new List<LatLng>();
     Trace line;
     if (gTraceList != null) {
       line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
       if(line != null && line.pointList.length != 0) {
-        int half =(line.pointList.length/2).floor();
-        tempLinePoints = line.pointList.sublist(0,half + 1).map((poi) {
+        int half = (line.pointList.length/2).floor();
+        tempLinePoints = line.pointList.sublist(0, half + 1).map((poi) {
           return new LatLng(poi.latitude, poi.longitude);
         }).toList();
       }
@@ -210,22 +212,23 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
     return Polyline(points: tempLinePoints, strokeWidth: 4.0, color: Colors.blue);
   }
 
-  Polyline linesDrawerLastHalf() {
-    List<LatLng> temp3 = new List<LatLng>();
-    Trace line;
-    if (gTraceList != null) {
-      line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
-      if(line != null || line.pointList.length != 0) {
-        int half=(line.pointList.length/2).floor();
-        temp3 = line.pointList.sublist(half).map((poi) {
-          return new LatLng(poi.latitude, poi.longitude);
-        }).toList();
-      }
-    }
-
-//    print('$temp3 maps.dart, line 191');
-    return Polyline(points: temp3, strokeWidth: 4.0, color: Colors.purple);
-  }
+  // Draw the second half of the route on the map from BusTrace table.
+//   Polyline linesDrawerLastHalf() {
+//     List<LatLng> temp3 = new List<LatLng>();
+//     Trace line;
+//     if (gTraceList != null) {
+//       line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
+//       if(line != null || line.pointList.length != 0) {
+//         int half=(line.pointList.length/2).floor();
+//         temp3 = line.pointList.sublist(half).map((poi) {
+//           return new LatLng(poi.latitude, poi.longitude);
+//         }).toList();
+//       }
+//     }
+//
+// //    print('$temp3 maps.dart, line 191');
+//     return Polyline(points: temp3, strokeWidth: 4.0, color: Colors.purple);
+//   }
 
   List<Marker> updateMarkers() {
     List<Marker> vTempMarker;

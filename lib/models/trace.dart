@@ -46,15 +46,15 @@ class Trace{
 
 
 
-class PostTraceList {
+class PostBusTraceList {
   final List<Trace> traceList;
 
-  PostTraceList({
+  PostBusTraceList({
     this.traceList,
   });
 
 
-  factory PostTraceList.fromJson(List<dynamic> parsedJson) {
+  factory PostBusTraceList.fromJson(List<dynamic> parsedJson) {
 
     List<Trace> vTraceList = new List<Trace>();
     for(int i=0;i<parsedJson.length;i++){
@@ -63,7 +63,7 @@ class PostTraceList {
 
     //buses = parsedJson.map((i) => Bus.fromJson(i)).toList();
 
-    return new PostTraceList(
+    return new PostBusTraceList(
       traceList: vTraceList,
     );
   }

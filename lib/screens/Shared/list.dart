@@ -20,10 +20,10 @@ List<Timetable> gTimetable;
 
 int next;
 int gBusListSize;
-double range = 150;
+double range = 1;
+String gMyBusId;
 String gStationText = "No stations nearby";
 bool gNearStation = false;
-String gMyBusId;
 
 BuildContext currentContext;
 ActivityRecognition gDrivingDetector = ActivityRecognition();

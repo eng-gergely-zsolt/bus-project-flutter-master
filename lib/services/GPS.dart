@@ -46,72 +46,44 @@ class GPS {
       List<Station> nearbyStations = new List<Station>.from(gStationList);
 
       bool detected = false;
-      nearbyStations.retainWhere((Station s) {
+      print("nearbyStations before retainWhere");
+      print(nearbyStations);
+
+      double min = 100.0;
+      String vStationName = "";
+      nearbyStations.retainWhere((item) {
         double dist = distanceInKmBetweenEarthCoordinates(userLocation.latitude,
-            userLocation.longitude, s.latitude, s.longitude);
-//        print(s.stationName + " dist = " + dist.toString() + " km");
+            userLocation.longitude, item.latitude, item.longitude);
+
+        if(dist < min){
+          min = dist;
+          vStationName = item.stationName;
+        }
+
         if (dist <= range) {
-          //Distance between two coordinates.
-//          print(s.stationName +
-//              " is the closest dist = " +
-//              dist.toString() +
-//              " km");
           detected = true;
           return true;
         }
         return false;
       });
+
+      print("nearbyStations after retainWhere - line 63");
+      print(nearbyStations);
+
       if (detected) {
         gNearStation = true;
-        gStationText = AppLocalizations.of(currentContext).translate('gps_you_are_at')/*"You are at: "*/ + nearbyStations.first.stationName;
+        gStationText = AppLocalizations.of(currentContext).translate('gps_you_are_at') + vStationName; // You are at
         getArrivalTimeList(int.parse(nearbyStations.first.stationId))
             .then((val) => gArrivalTimeList = val.arrivalTimeList);
       } else {
         gNearStation = false;
-        gStationText = AppLocalizations.of(currentContext).translate('settings_no_station');//"No stations nearby";
+        gStationText = AppLocalizations.of(currentContext).translate('settings_no_station'); // No stations nearby
+
         if (gArrivalTimeList != null && gArrivalTimeList.length > 0)
           gArrivalTimeList.clear();
       }
 
       if (gMyBusId != null) {
-        if (detected) {
-          /*if (nextStation == null) {
-            actualStation = actualLine.Stations.firstWhere((entry s) {
-              return s.StationID.toString() == nearbyStations.first.StationId;
-            });
-            next = actualLine.Stations.indexWhere((entry s) {
-              return s.StationID == actualStation.StationID;
-            });
-            next += 1;
-            nextStation = actualLine.Stations.elementAt(next);
-            stopwatch = new Stopwatch()..start();
-          } else {
-            if (nearbyStations.first.StationId == nextStation.StationID) {
-              stopwatch.stop();
-              Scaffold.of(currentContext).showSnackBar(new SnackBar(
-                content: new Text(
-                    "FROM ${actualStation.StationID} with nr: ${actualStation.StationNr} TO ${nextStation.StationID} with nr: ${nextStation.StationNr} IN ${stopwatch.elapsed.inMinutes}"),
-              ));
-              print(
-                  'ARRIVED TO NEXT STATION IN ${stopwatch.elapsed.inMinutes}');
-              actualStation = nextStation;
-              next += 1;
-              nextStation = actualLine.Stations.elementAt(next);
-            } else {
-              stopwatch.stop();
-              actualStation = actualLine.Stations.firstWhere((entry s) {
-                return s.StationID.toString() == nearbyStations.first.StationId;
-              });
-              next = actualLine.Stations.indexWhere((entry s) {
-                return s.StationID == actualStation.StationID;
-              });
-              next += 1;
-              nextStation = actualLine.Stations.elementAt(next);
-              stopwatch.reset();
-              stopwatch.start();
-            }
-          }*/
-        }
         if (gDrivingDetector.drivingScore >= 40) {
           var post = {
             'BusId': gMyBusId,

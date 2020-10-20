@@ -1,12 +1,9 @@
 import 'package:bus_project/services/AppLocalizations.dart';
-// import 'package:bus_project/services/AppPropertiesBLoC.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'package:bus_project/screens/Shared/list.dart';
-// import 'package:bus_project/models/line.dart';
 import 'buses.dart';
-// import 'package:background_fetch/background_fetch.dart';
 
 class Settings {
   LocationAccuracy ac;
@@ -101,20 +98,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
   @override
   Widget build(BuildContext context) {
     currentContext = context;
-    /*
-    var list = bus_info_list.map((var value) {
-      return new DropdownMenuItem<String>(
-        value: value.BusId,
-        child: new Text(value.BusId),
-      );
-    }).toList();
-    list.add(new DropdownMenuItem<String>(
-      value: 'Off',
-      child: new Text(AppLocalizations.of(context).translate('off')),//Text('Off'),
-    ));*/
-    return /*Scaffold(
-            body: Center(
-                child:*/
+    return
       LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
@@ -128,8 +112,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                   gGeoPosition.userLocation == null
                       ? CircularProgressIndicator()
                       : Text(AppLocalizations.of(context).translate('settings_location')/*"Location:"*/ +
-                      gGeoPosition.userLocation.latitude.toString() +
-                      " " +
+                      gGeoPosition.userLocation.latitude.toString() + " " +
                       gGeoPosition.userLocation.longitude.toString(),
                     style: TextStyle(fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic,
@@ -150,10 +133,10 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           );
                         } else {
                           _showDialog(
-                              AppLocalizations.of(context).translate('settings_no_station')/*"No station nearby!"*/,
-                              AppLocalizations.of(context).translate('settings_yes_station_1')+//"You need to be at most " +
+                              AppLocalizations.of(context).translate('settings_no_station'), // No station nearby!"
+                              AppLocalizations.of(context).translate('settings_yes_station_1') + // You need to be at most
                                   (range * 1000).toString() +
-                                  AppLocalizations.of(context).translate('settings_yes_station_2'));//    " meters away from a station to check for buses.");
+                                  AppLocalizations.of(context).translate('settings_yes_station_2')); // meters away from a station to check for buses
                         }
                       },
                       shape: new RoundedRectangleBorder(
@@ -161,7 +144,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           side: BorderSide(color: Colors.white10)),
                       color: Colors.white,
                       child: Text(
-                        AppLocalizations.of(context).translate('settings_btn_show_bus'),//"Show buses",
+                        AppLocalizations.of(context).translate('settings_btn_show_bus'), // Show buses
                         style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
@@ -170,13 +153,19 @@ class _GeoListenPageState extends State<GeoListenPage> {
                       ),
                     ),
                   ),
+
                   new Padding(padding: EdgeInsets.only(top: 20)),
-                  Text(gStationText,
+
+                  Text(
+                    gStationText,
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red
                     ),),
+
                   new Padding(padding: EdgeInsets.only(top: 15)),
+
                   gDrivingDetector.userActivity == null
                       ? CircularProgressIndicator()
                       : Text(
@@ -186,39 +175,6 @@ class _GeoListenPageState extends State<GeoListenPage> {
                         fontWeight: FontWeight.bold
                     ),),
                   new Padding(padding: EdgeInsets.only(top: 15)),
-                  /*new DropdownButton<String>(
-                  value: MyBusId == null ? 'Off' : MyBusId,
-                  items: list.reversed.toList(),
-                  onChanged: (newVal) {
-                    setState(() {
-                      if (newVal == 'Off') {
-                        MyBusId = null;
-                        nextStation = null;
-                        actualStation = null;
-                        actualLine = null;
-                        DrivingDetector.pauseDrivingDetection();
-                        BackgroundFetch.stop().then((int status) {
-                          print('[BackgroundFetch] stop success: $status');
-                        });
-                        appBloc.updateTitle();
-                        appBloc.updateFab();
-                      } else {
-                        MyBusId = newVal;
-                        BackgroundFetch.start().then((int status) {
-                          print('[BackgroundFetch] start success: $status');
-                        }).catchError((e) {
-                          print('[BackgroundFetch] start FAILURE: $e');
-                        });
-                        actualLine = line_list.firstWhere((Line l) {
-                          return l.LineID.toString() == newVal;
-                        });
-                        DrivingDetector.startDrivingDetection();
-                        appBloc.updateTitle();
-                        appBloc.updateFab();
-                      }
-                    });
-                  },
-                ),*/
                   Form(
                     key: _formKey,
                     autovalidate: true,
@@ -356,14 +312,6 @@ class _GeoListenPageState extends State<GeoListenPage> {
                             textColor: Colors.white,
                             padding: EdgeInsets.all(8.0),
                             onPressed: _submitForm,
-                            /*() {
-                        // Validate returns true if the form is valid, or false
-                        // otherwise.
-                          if (_formKey.currentState.validate()) {
-                            //distance=DistanceController.text as int;
-                            //timeInt=IntervalController.text as int;
-                          }
-                        },*/
                             child: Text(AppLocalizations.of(context).translate('settings_from_save').toUpperCase(),
                               style: TextStyle(fontStyle: FontStyle.italic),),//Text('Save Settings'),
                           ),
@@ -377,7 +325,5 @@ class _GeoListenPageState extends State<GeoListenPage> {
           );
         },
       );
-    /*),
-        );*/
   }
 }

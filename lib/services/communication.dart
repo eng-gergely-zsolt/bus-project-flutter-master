@@ -106,17 +106,17 @@ Future<PostTimetableList> getTimetableList() async {
 }
 
 
-Future<PostTraceList> getTraceList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetTraceList');
-  // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetTraceList');
+Future<PostBusTraceList> getBusTraceList() async {
+  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetBusTraceList');
+  // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetBusTraceList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetTracesList");
 
   if (response.statusCode == 200) {
-    var temp = PostTraceList.fromJson(json.decode(response.body));
+    var temp = PostBusTraceList.fromJson(json.decode(response.body));
 //    temp.traceList.forEach((f) => print(f.toString()));
     return temp;
   } else {
-    throw Exception('Failed to load getTraceList post!');
+    throw Exception('Failed to load getBusTraceList post!');
   }
 }
 

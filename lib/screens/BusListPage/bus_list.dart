@@ -65,11 +65,11 @@ class _BusListActionListener extends State<BusList1> {
 
 
     if (gTraceList == null) {
-      getTraceList().then((val) => setState(() {
+      getBusTraceList().then((val) => setState(() {
         gTraceList = val.traceList;
 
-//        print(traceList[2]);
-//        print('bus_list.dart, line 60');
+       // print(gTraceList[2]);
+       // print('bus_list.dart, line 60');
       }));
     }
 
