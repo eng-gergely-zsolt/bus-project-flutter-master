@@ -20,7 +20,7 @@ List<Timetable> gTimetable;
 
 int next;
 int gBusListSize;
-double range = 1;
+double gRangeInKilometer = 1;
 String gMyBusId;
 String gStationText = "No stations nearby";
 bool gNearStation = false;

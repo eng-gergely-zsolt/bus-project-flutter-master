@@ -17,22 +17,23 @@ import 'package:bus_project/models/bus_data.dart';
 import 'package:flutter_map/flutter_map.dart';
 
 
-class Maps extends StatefulWidget {
+
+class Map extends StatefulWidget {
   final Todo todo;
 
   @override
   MapsFlutter createState() => new MapsFlutter(todo);
-
-  Maps([this.todo]);
+  Map([this.todo]);
 }
 
 
 
-class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
+class MapsFlutter extends State<Map> with TickerProviderStateMixin {
   Todo todo;
-  List<Marker> markers;
+  // List<Marker> stationMarkers = List<Marker>();
+  // List<Marker> busMarkers = List<Marker>();
   List<Polyline> polyLines;
-  List<CircleMarker> circleMarkers;
+  // List<CircleMarker> circleMarkers = List<CircleMarker>();
   Timer _timer;
   MapController mapController;
   int selectedLayer = 0;
@@ -40,9 +41,9 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
   bool toggleStation = false;
   bool toggleLine = false;
   String selectedBusId = "Off";
-
-
   MapsFlutter([this.todo]);
+
+
 
   // Called once when the stateful widget is inserted in the widget tree.
   @override
@@ -55,7 +56,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
       SchedulerBinding.instance.addPostFrameCallback((_) => _animatedMapMove(
           LatLng(todo.actualLatitude, todo.actualLongitude), 17.0));
 
-    if (circleMarkers == null) circleMarkers = List<CircleMarker>();
+    // if (circleMarkers == null) circleMarkers = List<CircleMarker>();
   }
 
 
@@ -69,6 +70,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
     // There is no selected bus.
     if(selectedBusId != "Off") {
+      List<Marker> stationMarkers = List<Marker>();
+
       if (gLineList != null) {
 
         // selectedLine Line variable contains the lineId and the list of stations of a selected bus
@@ -93,14 +96,13 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
           filteredStationList = selectedLine.stationList.map((entry) {
             return gStationList.firstWhere((st){return st.stationId == entry.stationId.toString();});
           }).toList();
-          print(filteredStationList);
 
 
           // Map markers.
-          markers = filteredStationList.map((element) {
+          stationMarkers = filteredStationList.map((element) {
             // if (notFirst && endLines.contains(station.stationId)) { blue = false; }
             // notFirst = true;
-            return blue?Marker(
+            return blue ? Marker(
               // width: 40.0,
               // height: 40.0,
               point: new LatLng(element.latitude, element.longitude),
@@ -119,10 +121,10 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                                   content: Text(element.stationName),
                                 ));})),
 
-            ):Marker(
+              // Markers of stations.
+            ) : Marker(
               // width: 40.0,
               // height: 40.0,
-
               point: new LatLng(element.latitude, element.longitude),
               builder: (ctx) =>
                   Container(
@@ -140,7 +142,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                                   content: Text(element.stationName),
                                 ));})),);
           }).toList();
-          return new MarkerLayerOptions(markers: markers);
+          return new MarkerLayerOptions(markers: stationMarkers);
         }
         else{
           print('dick');
@@ -152,46 +154,144 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
 
 
+
+  LayerOptions filterBuses() {
+    bool blue = false;
+    Line selectedLine;
+    List<int> endStationsOfSelectedBus;
+    List<Station> filteredStationList;
+
+    // There is no selected bus.
+    if(selectedBusId != "Off") {
+      List<Marker> stationMarkers = List<Marker>();
+
+      if (gLineList != null) {
+
+        // selectedLine Line variable contains the lineId and the list of stations of a selected bus
+        selectedLine = gLineList.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
+
+
+        if (selectedLine != null && selectedLine.stationList.length != 0) {
+
+          // vTimetable list contains the timetable of the selected bus
+          List<Timetable> vTimetable = gTimetable.where((element) => element.busNr == selectedBusId).toList();
+
+          // endStationsOfSelectedBus contains the terminals of a selected line
+          endStationsOfSelectedBus = vTimetable.map((table) { return table.stationID; }).toList();
+
+          // Remove duplicates and sort the list.
+          endStationsOfSelectedBus = LinkedHashSet<int>.from(endStationsOfSelectedBus).toList();
+          endStationsOfSelectedBus.sort();
+
+
+          // gStationList contains the list of stations of a selected line
+          // filteredStationList contains the list of stations of a selected line
+          filteredStationList = selectedLine.stationList.map((entry) {
+            return gStationList.firstWhere((st){return st.stationId == entry.stationId.toString();});
+          }).toList();
+
+
+          // Map markers.
+          stationMarkers = filteredStationList.map((element) {
+            // if (notFirst && endLines.contains(station.stationId)) { blue = false; }
+            // notFirst = true;
+            return blue ? Marker(
+              // width: 40.0,
+              // height: 40.0,
+              point: new LatLng(element.latitude, element.longitude),
+
+              builder: (ctx) =>
+                  Container(
+                      key: Key('green'),
+                      child: IconButton(
+                          icon: Icon(
+                            MdiIcons.mapMarker,
+                            color: Colors.deepOrange,
+                            size: 40.0,),
+                          onPressed: () {
+                            Scaffold.of(currentContext).showSnackBar(
+                                new SnackBar(
+                                  content: Text(element.stationName),
+                                ));})),
+
+              // Markers of stations.
+            ) : Marker(
+              // width: 40.0,
+              // height: 40.0,
+              point: new LatLng(element.latitude, element.longitude),
+              builder: (ctx) =>
+                  Container(
+                      key: Key('green'),
+                      child: IconButton(
+                          icon: Icon(MdiIcons.mapMarker,
+                            color: Colors.yellow,
+                            // size: 40.0,
+
+                          ),
+                          //color: Colors.white,
+                          onPressed: () {
+                            Scaffold.of(currentContext).showSnackBar(
+                                new SnackBar(
+                                  content: Text(element.stationName),
+                                ));})),);
+          }).toList();
+          return new MarkerLayerOptions(markers: stationMarkers);
+        }
+        else{
+          print('dick');
+        }
+      }
+    }
+    return new MarkerLayerOptions(markers: []);
+  }
+
+
+
+
+
+
+
+  // Buses layer.
   LayerOptions switchLayers() {
-    markers = null;
-    if (circleMarkers != null)
-      circleMarkers.clear(); //<-This might be dangerous...
+    List<Marker> busMarkers = List<Marker>();
+    // if (circleMarkers.isNotEmpty)
+    //   circleMarkers.clear();
+
 
     if (selectedLayer == 0) {
-     print("LAYER SELECTED >> BUSES, maps.dart, line 128");
-      markers = updateMarkers();
+      busMarkers = updateMarkers();
       if (_timer == null) {
-        _timer = Timer.periodic(Duration(seconds: 30), (_) async {
-          BusInformationListPost temp = await getBusInformationList();
-          gBusList = temp.busList;
-          circleMarkers.clear();
+        _timer = Timer.periodic(Duration(seconds: 2), (_) async {
+          try{
+            BusInformationListPost temp = await getBusInformationList();
+            gBusList = temp.busList;
+          }catch(error){
+            print('Caught error: $error');
+          }
+          // circleMarkers.clear();
           setState(() {
-            markers = updateMarkers();
-
-            //It is called two times.
+            busMarkers = updateMarkers();
           });
         });
       }
+      return new MarkerLayerOptions(markers: busMarkers);
     }
     else if (selectedLayer == 1) {
-      print("Layer selected >> LINES, maps.dart, line 143");
+      polyLines = new List<Polyline>();
+
       if (_timer != null) {
         _timer.cancel();
         _timer = null;
       }
-      polyLines = new List<Polyline>();
-      markers = null;
 
       if(selectedBusId != "Off") {
         polyLines.add(linesDrawerFirstHalf());
         // polyLines.add(linesDrawerLastHalf());
       }
     }
-    if (markers != null) {
-      return new MarkerLayerOptions(markers: markers);
-    } else {
-      return new PolylineLayerOptions(polylines: polyLines);
-    }
+      // else {
+    //   return new PolylineLayerOptions(polylines: polyLines);
+    // }
   }
 
 
@@ -208,8 +308,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
         }).toList();
       }
     }
-//    print('$temp3, maps.dart, line 174');
-    return Polyline(points: tempLinePoints, strokeWidth: 4.0, color: Colors.blue);
+    return Polyline(points: tempLinePoints, strokeWidth: 9.0, color: Colors.red);
   }
 
   // Draw the second half of the route on the map from BusTrace table.
@@ -226,31 +325,25 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 //       }
 //     }
 //
-// //    print('$temp3 maps.dart, line 191');
 //     return Polyline(points: temp3, strokeWidth: 4.0, color: Colors.purple);
 //   }
 
+
+
   List<Marker> updateMarkers() {
     List<Marker> vTempMarker;
-    if (gBusList != null) {
-      // print(gBusList);
+    List<BusInformation> gBusListTemp;
+    gBusListTemp = gBusList;
 
-      // vTempMarker = gBusList.map((bus) {
-      //   vTempMarker.add(new Marker(
-      //     width: 30.0,
-      //     height: 30.0,
-      //     point: new LatLng(bus.actualLatitude, bus.actualLongitude),
-      //     builder: (ctx) => Container(
-      //       // key: Key('purple'),
-      //       child: new CircleAvatar(
-      //           foregroundColor: Colors.white,
-      //           backgroundColor: Colors.blue,
-      //           // (bus.pointsNearby>=0)?Colors.green:Colors.amber,
-      //           child: new Text(bus.busId)),
-      //     ),
-      //   ));
-      // }).toList();
-      vTempMarker = gBusList.map((bus) {
+    if(selectedBusId != 'Off' && gBusListTemp.isNotEmpty){
+      gBusListTemp.removeWhere((element) => element.busId != selectedBusId);
+      // gBusListTemp.reduce((element) => element.measurementTimestamp );
+    }
+    else{return [];}
+
+
+    if (gBusListTemp != null) {
+      vTempMarker = gBusListTemp.map((bus) {
         return Marker(
           width: 30.0,
           height: 30.0,
@@ -259,12 +352,12 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             key: Key('purple'),
             child: new CircleAvatar(
                 foregroundColor: Colors.white,
-                // backgroundColor: Colors.blue,
-                backgroundColor: (bus.pointsNearby != null)?Colors.green:Colors.amber,
+                backgroundColor: (bus.pointsNearby != null) ? Colors.green : Colors.amber,
                 child: new Text(bus.busId)),
           ),
         );
       }).toList();
+
 
       // Location of user
       if (gGeoPosition.userLocation != null) {
@@ -281,7 +374,8 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
               ),
             ),
           ));
-        }else{
+        }
+        else{
           vTempMarker.add(new Marker(
             width: 30.0,
             height: 30.0,
@@ -294,21 +388,25 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ),
           ));
         }
-        circleMarkers = <CircleMarker>[
-          CircleMarker(
-              point: new LatLng(gGeoPosition.userLocation.latitude,
-                  gGeoPosition.userLocation.longitude),
-              color: Colors.blue.withOpacity(0.4),
-              useRadiusInMeter: true,
-              radius: (range * 1000)
-          ),
-        ];
+
+
+        // circleMarkers = <CircleMarker>[
+        //   CircleMarker(
+        //       point: new LatLng(gGeoPosition.userLocation.latitude,
+        //           gGeoPosition.userLocation.longitude),
+        //       color: Colors.blue.withOpacity(0.4),
+        //       useRadiusInMeter: true,
+        //       radius: (gRangeInKilometer * 1000)
+        //   ),
+        // ];
       }
-    }
+    }else{return [];}
     return vTempMarker;
   }
 
-  List<Marker> stationMarkers() {
+
+
+  List<Marker> stationMarkersF() {
     List<Marker> temp2;
     if (gStationList != null) {
       temp2 = gStationList.map((station) {
@@ -330,6 +428,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
       }).toList();
 
       if (gGeoPosition.userLocation != null) {
+
         temp2.add(new Marker(
           width: 30.0,
           height: 30.0,
@@ -342,15 +441,15 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
             ),
           ),
         ));
-        circleMarkers = <CircleMarker>[
-          CircleMarker(
-              point: new LatLng(gGeoPosition.userLocation.latitude,
-                  gGeoPosition.userLocation.longitude),
-              color: Colors.blue.withOpacity(0.4),
-              useRadiusInMeter: true,
-              radius: (range * 1000)
-          ),
-        ];
+        // circleMarkers = <CircleMarker>[
+        //   CircleMarker(
+        //       point: new LatLng(gGeoPosition.userLocation.latitude,
+        //           gGeoPosition.userLocation.longitude),
+        //       color: Colors.blue.withOpacity(0.4),
+        //       useRadiusInMeter: true,
+        //       radius: (gRangeInKilometer * 1000)
+        //   ),
+        // ];
       }
     }
     return temp2;
@@ -390,7 +489,6 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
     });
 
     animation.addStatusListener((status) {
-//      print('$status maps.dart, line 342');
       if (status == AnimationStatus.completed) {
         controller.dispose();
       } else if (status == AnimationStatus.dismissed) {
@@ -453,14 +551,14 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
 
                   // Start journey button
                   new SizedBox(
-                    width: buttonSize,//80.0,
+                    width: buttonSize,
                     child: RaisedButton(
-                      child: (gMyBusId==null)?Text(AppLocalizations.of(context).translate('map_btn_start_journey')):Text(gMyBusId),//Text('Center'),
-                      highlightColor: gMyBusId==null?Color(0xFF42A5F5):Colors.redAccent,
+                      child:(gMyBusId == null) ? Text(AppLocalizations.of(context).translate('map_btn_start_journey')) : Text(gMyBusId), // Start journey
+                      highlightColor: gMyBusId == null ? Color(0xFF42A5F5) : Colors.redAccent,
                       shape: new RoundedRectangleBorder(
                           borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(color: gMyBusId==null?Colors.blue:Colors.red)),
-                      textColor: gMyBusId==null?Colors.blue:Colors.red,
+                          side: BorderSide(color: gMyBusId == null ? Colors.blue : Colors.red)),
+                      textColor: gMyBusId == null ? Colors.blue : Colors.red,
                       color: Colors.white70,
                       onPressed: () {
                         if(gMyBusId==null)
@@ -490,7 +588,6 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                       textColor: toggleBus ? Colors.white : Colors.blue,
                       color: toggleBus ? Colors.blue : Colors.white70,
                       onPressed: () {
-//                              print("Buses Pressed, maps.dart, line 427");
                         setState(() {
                           selectedLayer = 0;
                           toggleBus = true;
@@ -524,7 +621,6 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                       textColor: toggleLine ? Colors.white : Colors.blue,
                       color: toggleLine ? Colors.blue : Colors.white70,
                       onPressed: () {
-                        print("Lines Pressed, maps.dart, line 455");
                         setState(() {
                           selectedLayer = 1;
                           toggleBus = false;
@@ -560,9 +656,26 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                             padding:
                             EdgeInsets.only(left: 15.0, right: 15.0),
                           ),);},),),
-
                 ],
               ),
+            ),
+
+
+            // Child: dropdown list
+            Visibility(
+              child:new DropdownButton<String>(
+                isExpanded: true,
+                value: selectedBusId == "Off" ? 'Off' : selectedBusId,
+                items: list.reversed.toList(),
+                onChanged: (newVal) {
+                  setState(() {
+                    if (newVal == 'Off') {
+                      selectedBusId = "Off";
+                    } else {
+                      selectedBusId = newVal;
+                    }},);},),
+
+              visible: toggleBus,
             ),
 
 
@@ -606,6 +719,7 @@ class MapsFlutter extends State<Maps> with TickerProviderStateMixin {
                     },),
                   switchLayers(),
                   filterStations(),
+                  // filterBuses(),
                 ],),),
           ],
         ),

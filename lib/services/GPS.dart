@@ -60,21 +60,22 @@ class GPS {
           vStationName = item.stationName;
         }
 
-        if (dist <= range) {
+        if (dist <= gRangeInKilometer) {
           detected = true;
           return true;
         }
         return false;
       });
 
-      print("nearbyStations after retainWhere - line 63");
-      print(nearbyStations);
+      // print("nearbyStations after retainWhere - line 63");
+      // print(nearbyStations);
 
       if (detected) {
         gNearStation = true;
         gStationText = AppLocalizations.of(currentContext).translate('gps_you_are_at') + vStationName; // You are at
-        getArrivalTimeList(int.parse(nearbyStations.first.stationId))
-            .then((val) => gArrivalTimeList = val.arrivalTimeList);
+        getArrivalTimeList(int.parse(nearbyStations.first.stationId)).then((val) => gArrivalTimeList = val.arrivalTimeList);
+        print("gArrivalTimeList: ");
+        print(gArrivalTimeList);
       } else {
         gNearStation = false;
         gStationText = AppLocalizations.of(currentContext).translate('settings_no_station'); // No stations nearby

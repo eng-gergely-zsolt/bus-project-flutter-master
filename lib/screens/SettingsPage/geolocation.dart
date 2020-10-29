@@ -11,7 +11,6 @@ class Settings {
   String di = '';
   String sr = '';
 }
-//changed
 class GeoListenPage extends StatefulWidget {
   @override
   _GeoListenPageState createState() => _GeoListenPageState();
@@ -43,48 +42,42 @@ class _GeoListenPageState extends State<GeoListenPage> {
     super.dispose();
   }
 
+
   void _submitForm() {
     final FormState form = _formKey.currentState;
 
+
     if (!form.validate()) {
-      showMessage(AppLocalizations.of(context).translate('settings_form_invalid_message'));//'Form is not valid!  Please review and correct.');
+      showMessage(AppLocalizations.of(context).translate('settings_form_invalid_message')); // Form is not valid!  Please review and correct
     } else {
       form.save(); //This invokes each onSaved event
-
-      //print('Form save called, newSettings is now up to date...');
-      //print('accuracy: ${newSettings.ac}');
-      //print('distance: ${newSettings.di}');
-      //print('timeInt: ${newSettings.tm}');
 
       setState(() {
         gGeoPosition.accuracy = newSettings.ac;
         gGeoPosition.timeInt = int.parse(newSettings.tm);
         gGeoPosition.distance = int.parse(newSettings.di);
-        range = (int.parse(newSettings.sr) / 1000.toDouble());
-        //state.didChange(newValue); ////////////
+        gRangeInKilometer = (int.parse(newSettings.sr) / 1000.toDouble());
       });
     }
   }
 
-  //Don't know what this is...
+
   void showMessage(String message, [MaterialColor color = Colors.red]) {
     _scaffoldKey.currentState.showSnackBar(
         new SnackBar(backgroundColor: color, content: new Text(message)));
   }
 
+
   void _showDialog(String title, String message) {
-    // flutter defined function
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        // return object of type Dialog
         return AlertDialog(
           title: new Text(title),
           content: new Text(message),
           actions: <Widget>[
-            // usually buttons at the bottom of the dialog
             new FlatButton(
-              child: new Text(AppLocalizations.of(context).translate('close')),//Text("Close"),
+              child: new Text(AppLocalizations.of(context).translate('close')), // Close
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -94,6 +87,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +113,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                         fontSize: 20),
                   ),
 
+
                   Padding(
                     padding: const EdgeInsets.only(top: 38.0),
                     child: RaisedButton(
@@ -135,7 +130,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           _showDialog(
                               AppLocalizations.of(context).translate('settings_no_station'), // No station nearby!"
                               AppLocalizations.of(context).translate('settings_yes_station_1') + // You need to be at most
-                                  (range * 1000).toString() +
+                                  (gRangeInKilometer * 1000).toString() +
                                   AppLocalizations.of(context).translate('settings_yes_station_2')); // meters away from a station to check for buses
                         }
                       },
@@ -154,27 +149,34 @@ class _GeoListenPageState extends State<GeoListenPage> {
                     ),
                   ),
 
+
                   new Padding(padding: EdgeInsets.only(top: 20)),
 
+
                   Text(
-                    gStationText,
+                    gStationText, // No stations nearby
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold,
                         color: Colors.red
                     ),),
 
+
                   new Padding(padding: EdgeInsets.only(top: 15)),
 
-                  gDrivingDetector.userActivity == null
-                      ? CircularProgressIndicator()
-                      : Text(
-                    AppLocalizations.of(context).translate('settings_driving_score')+/*"Your phone is to*/" ${gDrivingDetector.userActivity.confidence}% ${gDrivingDetector.userActivity.type}! Driving Score= ${gDrivingDetector.drivingScore}",
+
+                  gDrivingDetector.userActivity == null ? CircularProgressIndicator() :
+                  Text( // "Your phone is to x%
+                    AppLocalizations.of(context).translate('settings_driving_score') + "${gDrivingDetector.userActivity.confidence}% ${gDrivingDetector.userActivity.type}! Driving Score= ${gDrivingDetector.drivingScore}",
                     style: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold
                     ),),
+
+
                   new Padding(padding: EdgeInsets.only(top: 15)),
+
+
                   Form(
                     key: _formKey,
                     autovalidate: true,
@@ -191,30 +193,32 @@ class _GeoListenPageState extends State<GeoListenPage> {
                           items: [
                             DropdownMenuItem<LocationAccuracy>(
                                 value: LocationAccuracy.bestForNavigation,
-                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_best'))),//Text("Best accuracy")),
+                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_best'))), // Best accuracy
                             DropdownMenuItem<LocationAccuracy>(
                                 value: LocationAccuracy.high,
-                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_high'))),//Text("High accuracy")),
+                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_high'))), // High accuracy
                             DropdownMenuItem<LocationAccuracy>(
                                 value: LocationAccuracy.medium,
-                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_med'))),//Text("Medium accuracy")),
+                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_med'))), // Medium accuracy
                             DropdownMenuItem<LocationAccuracy>(
                                 value: LocationAccuracy.low,
-                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_low'))),//Text("Low accuracy")),
+                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_low'))), // Low accuracy
                             DropdownMenuItem<LocationAccuracy>(
                                 value: LocationAccuracy.lowest,
-                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_lowest'))),//Text("Lowest accuracy")),
+                                child: new Text(AppLocalizations.of(context).translate('settings_select_accuracy_lowest'))), // Lowest accuracy
                           ],
                           onChanged: (LocationAccuracy newValue) {
-                            //print("Changed");
                             setState(() {
-                              //print(newValue.toString());
                               newSettings.ac = newValue;
                               gGeoPosition.accuracy = newValue;
                             });
                           },
                         ),
+
+
                         new Padding(padding: EdgeInsets.only(top: 20)),
+
+
                         TextFormField(
                           decoration: new InputDecoration(
                             labelText: AppLocalizations.of(context).translate('settings_tff_interval'),
@@ -230,13 +234,12 @@ class _GeoListenPageState extends State<GeoListenPage> {
                                 borderRadius: new BorderRadius.circular(25.0),
                                 borderSide: BorderSide(color: Colors.blue, width: 0.5)
                             ),
-                          ),//"Interval in seconds"),
-                          //controller: IntervalController,
+                          ), // Interval in seconds
                           keyboardType: TextInputType.number,
                           initialValue: gGeoPosition.timeInt.toString(),
                           validator: (value) {
                             if (value.isEmpty) {
-                              return AppLocalizations.of(context).translate('settings_from_empty');//'If you want to save the settings you must provide information.';
+                              return AppLocalizations.of(context).translate('settings_from_empty'); // If you want to save the settings you must provide information
                             }
                             return null;
                           },
@@ -245,7 +248,11 @@ class _GeoListenPageState extends State<GeoListenPage> {
                             fontFamily: "Poppins",
                           ),
                         ),
+
+
                         new Padding(padding: EdgeInsets.only(top: 20)),
+
+
                         TextFormField(
                           decoration: new InputDecoration(
                             labelText: AppLocalizations.of(context).translate('settings_tff_distance'),
@@ -261,20 +268,23 @@ class _GeoListenPageState extends State<GeoListenPage> {
                                 borderRadius: new BorderRadius.circular(25.0),
                                 borderSide: BorderSide(color: Colors.blue, width: 0.5)
                             ),
-                          ),//"Distance in meters"),
-                          //controller: DistanceController,
+                          ), // Distance in meters
                           keyboardType: TextInputType.number,
                           cursorColor: Colors.blue,
                           initialValue: gGeoPosition.distance.toString(),
                           validator: (value) {
                             if (value.isEmpty) {
-                              return AppLocalizations.of(context).translate('settings_from_empty');//'If you want to save the settings you must provide information.';
+                              return AppLocalizations.of(context).translate('settings_from_empty'); // If you want to save the settings you must provide information
                             }
                             return null;
                           },
                           onSaved: (val) => newSettings.di = val,
                         ),
+
+
                         new Padding(padding: EdgeInsets.only(top: 20)),
+
+
                         TextFormField(
                           decoration: new InputDecoration(
                             labelText: AppLocalizations.of(context).translate('settings_tff_station_range'),
@@ -290,18 +300,20 @@ class _GeoListenPageState extends State<GeoListenPage> {
                                 borderRadius: new BorderRadius.circular(25.0),
                                 borderSide: BorderSide(color: Colors.blue, width: 0.5)
                             ),
-                          ),//"Station detection distance in meters"),
-                          //controller: DistanceController,
+                          ), // Station detection distance in meters
                           keyboardType: TextInputType.number,
-                          initialValue: (range * 1000).toString(),
+                          initialValue: (gRangeInKilometer.toInt() * 1000).toString(),
                           validator: (value) {
                             if (value.isEmpty) {
-                              return AppLocalizations.of(context).translate('settings_from_empty');//'If you want to save the settings you must provide information.';
+                              return AppLocalizations.of(context).translate('settings_from_empty'); // If you want to save the settings you must provide information
                             }
                             return null;
                           },
                           onSaved: (val) => newSettings.sr = val,
                         ),
+
+
+                        // Button: Save Settings
                         Padding(
                           padding: const EdgeInsets.only(top: 60.0),
                           child: RaisedButton(
@@ -313,7 +325,7 @@ class _GeoListenPageState extends State<GeoListenPage> {
                             padding: EdgeInsets.all(8.0),
                             onPressed: _submitForm,
                             child: Text(AppLocalizations.of(context).translate('settings_from_save').toUpperCase(),
-                              style: TextStyle(fontStyle: FontStyle.italic),),//Text('Save Settings'),
+                              style: TextStyle(fontStyle: FontStyle.italic),), // Button: Save Settings
                           ),
                         ),
                       ],

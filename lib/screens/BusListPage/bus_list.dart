@@ -7,7 +7,7 @@ import 'package:bus_project/services/AppLocalizations.dart';
 import 'package:bus_project/services/AppPropertiesBLoC.dart';
 import 'package:flutter/material.dart';
 import 'package:bus_project/screens/Shared/list.dart';
-import 'package:bus_project/screens/MapPage/maps.dart';
+import 'package:bus_project/screens/MapPage/map.dart';
 import 'package:bus_project/services/communication.dart';
 import 'timetable.dart';
 
@@ -25,9 +25,6 @@ class BusList1 extends StatefulWidget {
 }
 
 class _BusListActionListener extends State<BusList1> {
-  //List<int> bus_name = list();
-  //Map<int, String> _list_map = list_map();
-
   @override
   void initState() {
     super.initState();
@@ -37,6 +34,8 @@ class _BusListActionListener extends State<BusList1> {
         gBusDataList = val.vBusList;
       }));
     }
+
+
     if (gBusList == null) {
       getBusInformationList().then((val) => setState(() {
         gBusList = val.busList;
@@ -102,8 +101,6 @@ class _BusListActionListener extends State<BusList1> {
         ? Scaffold(
         body: Center(
             child: Column(mainAxisAlignment: MainAxisAlignment.center,
-
-                ///new
                 children: <Widget>[CircularProgressIndicator()])))
         : ListView.builder(
       itemCount: gBusDataList.length,
@@ -115,8 +112,7 @@ class _BusListActionListener extends State<BusList1> {
           // ignore: missing_return
           confirmDismiss: (DismissDirection dir){
             if(dir == DismissDirection.endToStart){
-//                    print("right swap");
-              BusInformation bus =gBusList.firstWhere((x){
+              BusInformation bus = gBusList.firstWhere((x){
                 return gBusDataList.elementAt(index).busId == x.busId;
               },orElse: () => null);
               if(bus != null) {
@@ -127,7 +123,7 @@ class _BusListActionListener extends State<BusList1> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => Maps(coords),
+                    builder: (context) => Map(coords),
                   ),
                 );
               }

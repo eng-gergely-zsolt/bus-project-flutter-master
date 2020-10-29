@@ -11,7 +11,7 @@ import 'package:bus_project/models/timetable.dart';
 
 
 Future<BusInformationListPost> getBusInformationList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetBusInformationList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetBusInformationList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetBusInformationList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetBusInformation");
 
@@ -28,7 +28,7 @@ Future<BusInformationListPost> getBusInformationList() async {
 
 
 Future<BusList> getBusList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetBusList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetBusList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetBusList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetBusesList");
 
@@ -43,7 +43,7 @@ Future<BusList> getBusList() async {
 
 
 Future<PostLineList> getLineList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetLineList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetLineList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetLineList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetLinesList");
 
@@ -58,7 +58,7 @@ Future<PostLineList> getLineList() async {
 
 
 Future<PostStationList> getStationList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetStationList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetStationList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetStationList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetStationList");
 
@@ -77,7 +77,7 @@ Future<PostArrivalTimeList> getArrivalTimeList(int stationID) async {
   // "http://192.168.0.220:8080/WCFService/Service1/web/GetArrivalTimeList?StationID="
   // "http://193.226.0.198:5210/WCFService/Service1/web/GetTimeList?StationID="
   final response =
-  await http.get("http://192.168.1.7:8080/WCFService/Service1/web/GetArrivalTimeList?StationID=" + stationID.toString());
+  await http.get("http://192.168.1.2:8080/WCFService/Service1/web/GetArrivalTimeList?StationID=" + stationID.toString());
 
   if (response.statusCode == 200) {
     var temp = PostArrivalTimeList.fromJson(json.decode(response.body));
@@ -90,7 +90,7 @@ Future<PostArrivalTimeList> getArrivalTimeList(int stationID) async {
 
 
 Future<PostTimetableList> getTimetableList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetTimetableList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetTimetableList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetTimetableList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetTimetable");
 
@@ -107,7 +107,7 @@ Future<PostTimetableList> getTimetableList() async {
 
 
 Future<PostBusTraceList> getBusTraceList() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/GetBusTraceList');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/GetBusTraceList');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/GetBusTraceList');
   // final response = await http.get("http://193.226.0.198:5210/WCFService/Service1/web/GetTracesList");
 
@@ -125,7 +125,7 @@ void postBusInformation(Map body) async {
   // "http://192.168.1.7:8080/WCFService/Service1/web/PostBusInformation"
   // "http://192.168.0.220:8080/WCFService/Service1/web/PostBusInformation"
   // 'http://193.226.0.198:5210/WCFService/Service1/web/PostBusInformation'
-  return http.post("http://192.168.1.7:8080/WCFService/Service1/web/PostBusInformation",
+  return http.post("http://192.168.1.2:8080/WCFService/Service1/web/PostBusInformation",
       headers: {"Content-Type": "application/json"},
       body: json.encode(body)).then((http.Response response) {
     final int statusCode = response.statusCode;
@@ -143,7 +143,7 @@ void postBusInformationTest(Map body) async {
   // "http://192.168.1.7:8080/WCFService/Service1/web/PostBusMeasurement"
   // "http://192.168.0.220:8080/WCFService/Service1/web/PostBusMeasurement"
   // "http://193.226.0.198:5210/WCFService/Service1/web/PostBusMeasurement"
-  return http.post("http://192.168.1.7:8080/WCFService/Service1/web/PostBusMeasurement",
+  return http.post("http://192.168.1.2:8080/WCFService/Service1/web/PostBusMeasurement",
       headers: {"Content-Type": "application/json"},
       body: json.encode(body)).then((http.Response response) {
     final int statusCode = response.statusCode;
@@ -158,7 +158,7 @@ void postBusInformationTest(Map body) async {
 
 
 Future<DateTime> synchronization() async {
-  final response = await http.get('http://192.168.1.7:8080/WCFService/Service1/web/Synchronization');
+  final response = await http.get('http://192.168.1.2:8080/WCFService/Service1/web/Synchronization');
   // final response = await http.get('http://192.168.0.220:8080/WCFService/Service1/web/Synchronization');
   // final response = await http.get('http://193.226.0.198:5210/WCFService/Service1/web/Syncronization');
 

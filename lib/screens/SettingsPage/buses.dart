@@ -9,7 +9,7 @@ class BusesScreen extends StatelessWidget {
     currentContext = context;
     return Scaffold(
       appBar: AppBar(
-          title: Text(AppLocalizations.of(context).translate('buses_title'))//Text("Incoming Buses"),
+          title: Text(AppLocalizations.of(context).translate('buses_title')) // Incoming Buses
       ),
       body: Center(
           child: ListView.builder(

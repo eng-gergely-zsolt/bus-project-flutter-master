@@ -3,7 +3,7 @@ import 'package:bus_project/screens/SettingsPage/geolocation.dart';
 import 'package:bus_project/services/AppLocalizations.dart';
 import 'package:bus_project/services/AppPropertiesBLoC.dart';
 import 'package:flutter/material.dart';
-import 'package:bus_project/screens/MapPage/maps.dart';
+import 'package:bus_project/screens/MapPage/map.dart';
 import 'package:bus_project/screens/BusListPage/bus_list.dart';
 
 import 'list.dart';
@@ -158,7 +158,7 @@ class NewBar extends State<Start> with SingleTickerProviderStateMixin {
         physics: NeverScrollableScrollPhysics(),
         children: [
           BusList1(),
-          Maps(),
+          Map(),
           GeoListenPage(),
         ]);
   }
