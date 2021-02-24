@@ -1,20 +1,20 @@
 class Timetable {
-  String busNr;
-  String startTime;
+  String lineId;
   int stationID;
+  String startTime;
 
-  Timetable({this.busNr, this.startTime, this.stationID});
+  Timetable({this.lineId, this.startTime, this.stationID});
 
   factory Timetable.fromJson(Map<String, dynamic> json) {
     return new Timetable(
-        busNr: json['BusNr'],
+        lineId: json['BusNr'],
         stationID: json['StationId'],
         startTime: json['StartTime'].toString());
   }
 
   @override
   String toString() {
-    return busNr.toString() + " will start : " + startTime + " from " + stationID.toString() + "\n";
+    return lineId.toString() + " will start : " + startTime + " from " + stationID.toString() + "\n";
   }
 }
 

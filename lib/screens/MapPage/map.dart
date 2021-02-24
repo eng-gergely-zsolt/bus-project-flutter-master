@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:bus_project/models/line.dart';
+import 'package:bus_project/models/station_on_line.dart';
 import 'package:bus_project/models/station.dart';
 import 'package:bus_project/models/timetable.dart';
 import 'package:bus_project/models/trace.dart';
 import 'package:bus_project/screens/Shared/start.dart';
 import 'package:bus_project/services/AppLocalizations.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:bus_project/screens/BusListPage/bus_list.dart';
 import 'package:bus_project/services/communication.dart';
@@ -15,8 +16,11 @@ import '../Shared/list.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:bus_project/models/bus_data.dart';
 import 'package:flutter_map/flutter_map.dart';
-
-
+import "dart:math" show pi;
+import "dart:math" show sin;
+import "dart:math" show cos;
+import "dart:math" show atan2;
+import "dart:math" show sqrt;
 
 class Map extends StatefulWidget {
   final Todo todo;
@@ -29,11 +33,30 @@ class Map extends StatefulWidget {
 
 
 class MapsFlutter extends State<Map> with TickerProviderStateMixin {
+
+  degreesToRadians(degrees){
+    return degrees * pi / 180;
+  }
+
+  getDistanceBetweenPoints(lat1, lng1, lat2, lng2) {
+  int R = 6378137;
+
+  double dLat = degreesToRadians(lat2 - lat1);
+  double dLong = degreesToRadians(lng2 - lng1);
+
+  double a = sin(dLat / 2) * sin(dLat / 2) + cos(degreesToRadians(lat1)) * cos(degreesToRadians(lat1)) * sin(dLong / 2) * sin(dLong / 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  double distance = R * c;
+
+  return distance;
+}
+
   Todo todo;
+  List<Marker> userLocationMarker = List<Marker>();
   // List<Marker> stationMarkers = List<Marker>();
   // List<Marker> busMarkers = List<Marker>();
   List<Polyline> polyLines;
-  // List<CircleMarker> circleMarkers = List<CircleMarker>();
+  List<CircleMarker> circleMarkers = List<CircleMarker>();
   Timer _timer;
   MapController mapController;
   int selectedLayer = 0;
@@ -42,6 +65,7 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
   bool toggleLine = false;
   String selectedBusId = "Off";
   MapsFlutter([this.todo]);
+  int dropdownValue = 2;
 
 
 
@@ -60,93 +84,125 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
   }
 
 
+  // A felhasználó helyadataival kapcsolatos markerek kezelése.
+  LayerOptions permanentMarkers() {
+
+    // A listát törölni kell mindig, nehogy több marker is megjelenjen benne.
+    userLocationMarker.clear();
+
+    // Ha a felhasználó megosztja a helyadatait.
+    if (gGeoPosition.userLocation != null) {
+      // TODO: SET TIMER IF THERE IS A USER LOCATION
+
+      // Ha a felhasználó osztja a helyadatokat, de nem utazik busszal.
+      if (gMyBusId == null ) {
+        userOnBus.lineId = '-1';
+        userLocationMarker.add(new Marker(
+          point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+          builder: (ctx) =>
+          new Container(
+            child: Icon(
+                MdiIcons.mapMarker,
+                color: Colors.blueGrey
+            ),
+          ),
+        ));
+      }
+
+      // Ha a felhasználó egy kiválasztott busszal utazik.
+      else {
+        userLocationMarker.add(new Marker(
+          width: 30.0,
+          height: 30.0,
+          point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+          builder: (ctx) => new Container(
+            child: new CircleAvatar(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                child: new Text(gMyBusId)
+            ),
+          ),
+        ));
+      }
+
+      return new MarkerLayerOptions(markers: userLocationMarker);
+    }
+
+    userOnBus.lineId = '-1';
+    return new MarkerLayerOptions(markers: []);
+  }
+
+
 
   LayerOptions filterStations() {
-    bool blue = false;
-    // bool notFirst = false;
-    Line selectedLine;
-    List<int> endStationsOfSelectedBus;
-    List<Station> filteredStationList;
+    if(selectedBusId != "Off" && stationOnLineListGlobal != null) {
+      // bool notFirst = false;
 
-    // There is no selected bus.
-    if(selectedBusId != "Off") {
-      List<Marker> stationMarkers = List<Marker>();
-
-      if (gLineList != null) {
-
-        // selectedLine Line variable contains the lineId and the list of stations of a selected bus
-        selectedLine = gLineList.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
+      StationOnLine selectedLineWithStations = stationOnLineListGlobal.singleWhere( (e) => e.lineId == selectedBusId, orElse: () => null);
 
 
-        if (selectedLine != null && selectedLine.stationList.length != 0) {
+      if (selectedLineWithStations != null && selectedLineWithStations.lineData.length != 0) {
 
-          // vTimetable list contains the timetable of the selected bus
-          List<Timetable> vTimetable = gTimetable.where((element) => element.busNr == selectedBusId).toList();
+        List<Timetable> vTimetable = timetableListGlobal.where((e) => e.lineId == selectedBusId).toList();
+        
+        List<int> terminusOfSelectedLine = vTimetable.map((table) { return table.stationID; }).toList();
 
-          // endStationsOfSelectedBus contains the terminals of a selected line
-          endStationsOfSelectedBus = vTimetable.map((table) { return table.stationID; }).toList();
-
-          // Remove duplicates and sort the list.
-          endStationsOfSelectedBus = LinkedHashSet<int>.from(endStationsOfSelectedBus).toList();
-          endStationsOfSelectedBus.sort();
+        terminusOfSelectedLine = LinkedHashSet<int>.from(terminusOfSelectedLine).toList();
+        terminusOfSelectedLine.sort();
 
 
-          // gStationList contains the list of stations of a selected line
-          // filteredStationList contains the list of stations of a selected line
-          filteredStationList = selectedLine.stationList.map((entry) {
-            return gStationList.firstWhere((st){return st.stationId == entry.stationId.toString();});
-          }).toList();
+        List<Station> filteredStationList = selectedLineWithStations. lineData.map((e) {
+          return gStationList.firstWhere((st){return st.id == e.stationId.toString();});
+        }).toList();
 
 
-          // Map markers.
-          stationMarkers = filteredStationList.map((element) {
-            // if (notFirst && endLines.contains(station.stationId)) { blue = false; }
-            // notFirst = true;
-            return blue ? Marker(
-              // width: 40.0,
-              // height: 40.0,
-              point: new LatLng(element.latitude, element.longitude),
+        // Map markers.
+        List<Marker> stationMarkers = List<Marker>();
+        stationMarkers = filteredStationList.map((element) {
+          // if (notFirst && endLines.contains(station.stationId)) { blue = false; }
+          // notFirst = true;
+          bool blue = false;
+          return blue ? Marker(
+            // width: 40.0,
+            // height: 40.0,
+            point: new LatLng(element.latitude, element.longitude),
 
-              builder: (ctx) =>
-                  Container(
-                      key: Key('green'),
-                      child: IconButton(
-                          icon: Icon(
-                            MdiIcons.mapMarker,
-                            color: Colors.deepOrange,
-                            size: 40.0,),
-                          onPressed: () {
-                            Scaffold.of(currentContext).showSnackBar(
-                                new SnackBar(
-                                  content: Text(element.stationName),
-                                ));})),
+            builder: (ctx) =>
+                Container(
+                    key: Key('green'),
+                    child: IconButton(
+                        icon: Icon(
+                          MdiIcons.mapMarker,
+                          color: Colors.deepOrange,
+                          size: 40.0,),
+                        onPressed: () {
+                          Scaffold.of(currentContext).showSnackBar(
+                              new SnackBar(
+                                content: Text(element.stationName),
+                              ));})),
 
-              // Markers of stations.
-            ) : Marker(
-              // width: 40.0,
-              // height: 40.0,
-              point: new LatLng(element.latitude, element.longitude),
-              builder: (ctx) =>
-                  Container(
-                      key: Key('green'),
-                      child: IconButton(
-                          icon: Icon(MdiIcons.mapMarker,
-                            color: Colors.yellow,
-                            // size: 40.0,
+            // Markers of stations.
+          ) : Marker(
+            // width: 40.0,
+            // height: 40.0,
+            point: new LatLng(element.latitude, element.longitude),
+            builder: (ctx) =>
+                Container(
+                    key: Key('green'),
+                    child: IconButton(
+                        icon: Icon(MdiIcons.mapMarker,
+                          color: Colors.yellow,
+                          // size: 40.0,
 
-                          ),
-                          //color: Colors.white,
-                          onPressed: () {
-                            Scaffold.of(currentContext).showSnackBar(
-                                new SnackBar(
-                                  content: Text(element.stationName),
-                                ));})),);
-          }).toList();
-          return new MarkerLayerOptions(markers: stationMarkers);
-        }
-        else{
-          print('dick');
-        }
+                        ),
+                        //color: Colors.white,
+                        onPressed: () {
+                          Scaffold.of(currentContext).showSnackBar(
+                              new SnackBar(
+                                content: Text(element.stationName),
+                              ));})),);
+        }).toList();
+        return new MarkerLayerOptions(markers: stationMarkers);
       }
     }
     return new MarkerLayerOptions(markers: []);
@@ -157,7 +213,7 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 
   LayerOptions filterBuses() {
     bool blue = false;
-    Line selectedLine;
+    StationOnLine selectedLine;
     List<int> endStationsOfSelectedBus;
     List<Station> filteredStationList;
 
@@ -165,16 +221,16 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
     if(selectedBusId != "Off") {
       List<Marker> stationMarkers = List<Marker>();
 
-      if (gLineList != null) {
+      if (stationOnLineListGlobal != null) {
 
         // selectedLine Line variable contains the lineId and the list of stations of a selected bus
-        selectedLine = gLineList.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
+        selectedLine = stationOnLineListGlobal.singleWhere( (element) => element.lineId == selectedBusId, orElse: () => null);
 
 
-        if (selectedLine != null && selectedLine.stationList.length != 0) {
+        if (selectedLine != null && selectedLine.lineData.length != 0) {
 
           // vTimetable list contains the timetable of the selected bus
-          List<Timetable> vTimetable = gTimetable.where((element) => element.busNr == selectedBusId).toList();
+          List<Timetable> vTimetable = timetableListGlobal.where((element) => element.lineId == selectedBusId).toList();
 
           // endStationsOfSelectedBus contains the terminals of a selected line
           endStationsOfSelectedBus = vTimetable.map((table) { return table.stationID; }).toList();
@@ -186,8 +242,8 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 
           // gStationList contains the list of stations of a selected line
           // filteredStationList contains the list of stations of a selected line
-          filteredStationList = selectedLine.stationList.map((entry) {
-            return gStationList.firstWhere((st){return st.stationId == entry.stationId.toString();});
+          filteredStationList = selectedLine.lineData.map((entry) {
+            return gStationList.firstWhere((st){return st.id == entry.stationId.toString();});
           }).toList();
 
 
@@ -236,9 +292,6 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
                                 ));})),);
           }).toList();
           return new MarkerLayerOptions(markers: stationMarkers);
-        }
-        else{
-          print('dick');
         }
       }
     }
@@ -253,22 +306,19 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 
   // Buses layer.
   LayerOptions switchLayers() {
-    List<Marker> busMarkers = List<Marker>();
-    // if (circleMarkers.isNotEmpty)
-    //   circleMarkers.clear();
-
-
     if (selectedLayer == 0) {
+      List<Marker> busMarkers = List<Marker>();
       busMarkers = updateMarkers();
+
       if (_timer == null) {
         _timer = Timer.periodic(Duration(seconds: 2), (_) async {
+
           try{
-            BusInformationListPost temp = await getBusInformationList();
+            BusDataListPost temp = await getBusDataList();
             gBusList = temp.busList;
           }catch(error){
             print('Caught error: $error');
           }
-          // circleMarkers.clear();
           setState(() {
             busMarkers = updateMarkers();
           });
@@ -283,15 +333,13 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
         _timer.cancel();
         _timer = null;
       }
-
-      if(selectedBusId != "Off") {
+      if (selectedBusId != "Off") {
         polyLines.add(linesDrawerFirstHalf());
         // polyLines.add(linesDrawerLastHalf());
       }
+      return new PolylineLayerOptions(polylines: polyLines);
     }
-      // else {
-    //   return new PolylineLayerOptions(polylines: polyLines);
-    // }
+    else{return new MarkerLayerOptions(markers: []);}
   }
 
 
@@ -300,13 +348,15 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
     List<LatLng> tempLinePoints = new List<LatLng>();
     Trace line;
     if (gTraceList != null) {
-      line = gTraceList.singleWhere((o) => o.lineId.toString() == selectedBusId, orElse: () => null);
+      line = gTraceList.singleWhere((e) => e.lineId.toString() == selectedBusId, orElse: () => null);
       if(line != null && line.pointList.length != 0) {
-        int half = (line.pointList.length/2).floor();
-        tempLinePoints = line.pointList.sublist(0, half + 1).map((poi) {
+        int half = (line.pointList.length).floor();
+        tempLinePoints = line.pointList.sublist(0, half).map((poi) {
           return new LatLng(poi.latitude, poi.longitude);
         }).toList();
       }
+    }
+    else{
     }
     return Polyline(points: tempLinePoints, strokeWidth: 9.0, color: Colors.red);
   }
@@ -329,79 +379,80 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 //   }
 
 
-
+  // Ez a függvény frissíti a buszokat jelző markereket a térképen.
   List<Marker> updateMarkers() {
-    List<Marker> vTempMarker;
-    List<BusInformation> gBusListTemp;
-    gBusListTemp = gBusList;
 
-    if(selectedBusId != 'Off' && gBusListTemp.isNotEmpty){
-      gBusListTemp.removeWhere((element) => element.busId != selectedBusId);
-      // gBusListTemp.reduce((element) => element.measurementTimestamp );
-    }
-    else{return [];}
+    // Ha a felhasználó kiválaszt egy buszt.
+    if(selectedBusId != 'Off' && gBusList != null && gBusList.length != 0) {
+
+      print('FAAAAAAAAAASZ');
+      print(gBusList.length);
+
+      List<Marker> markersTemp = List<Marker>();
+
+      List<BusData> busList = gBusList.map((e) => e).toList();
+      busList.removeWhere((element) => element.lineId != selectedBusId);
+
+      // Csak az egyik irányba közlekedő buszok.
+      List<BusData> busListOnDirection = busList.map((e) => e).toList();
+      busListOnDirection.removeWhere((element) => element.direction != userOnBus.direction);
 
 
-    if (gBusListTemp != null) {
-      vTempMarker = gBusListTemp.map((bus) {
+      // Ha a felhasználó egy adott busszal utazik.
+      if(userOnBus.lineId != '-1' && busListOnDirection.length != 0) {
+        List<BusData> busListTemp2 = busList.map((e) => e).toList();
+
+        // Az első busszal lévő távolságot beállítja minimumnak.
+        double minDistance = 10000;
+        // getDistanceBetweenPoints(busListTemp2[0].latitude, busListTemp2[0].longitude, userOnBus.latitude, userOnBus.longitude);
+        int positionTemp = -1;
+
+        // Majd az összess elemmel kiszámolja a távolságot és kiválasztja a valós minimumot.
+        // Az elemnek lementjük a pozicióját.
+        for(int i = 0; i < busListTemp2.length; ++i){
+
+          if(busListTemp2[i].direction == userOnBus.direction) {
+            double minDistanceTemp = getDistanceBetweenPoints(busListTemp2[i].latitude, busListTemp2[i].longitude, userOnBus.latitude, userOnBus.longitude);
+
+            if(minDistanceTemp < minDistance){
+              positionTemp = i;
+            }
+          }
+        }
+
+        if(positionTemp != -1) {
+          busList.removeAt(positionTemp);
+        }
+      }
+
+      markersTemp = busList.map((e) {
         return Marker(
-          width: 30.0,
-          height: 30.0,
-          point: new LatLng(bus.actualLatitude, bus.actualLongitude),
+          point: new LatLng(e.latitude, e.longitude),
           builder: (ctx) => Container(
             key: Key('purple'),
             child: new CircleAvatar(
                 foregroundColor: Colors.white,
-                backgroundColor: (bus.pointsNearby != null) ? Colors.green : Colors.amber,
-                child: new Text(bus.busId)),
+                backgroundColor: (e.pointsNearby != null) ? Colors.green : Colors.red,
+                child: new Text(e.lineId)),
           ),
         );
       }).toList();
 
 
-      // Location of user
+      // A felhasználó helye.
       if (gGeoPosition.userLocation != null) {
-        /// SET TIMER IF THERE IS A USER LOCATION
-        if(gMyBusId == null) {
-          vTempMarker.add(new Marker(
-            width: 30.0,
-            height: 30.0,
-            point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
-            builder: (ctx) => new Container(
-              child: Icon(
-                  MdiIcons.mapMarker,
-                  color: Colors.blueGrey
-              ),
-            ),
-          ));
-        }
-        else{
-          vTempMarker.add(new Marker(
-            width: 30.0,
-            height: 30.0,
-            point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
-            builder: (ctx) => new Container(
-              child: new CircleAvatar(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.red,
-                  child: new Text(gMyBusId)),
-            ),
-          ));
-        }
-
-
         // circleMarkers = <CircleMarker>[
         //   CircleMarker(
-        //       point: new LatLng(gGeoPosition.userLocation.latitude,
-        //           gGeoPosition.userLocation.longitude),
+        //       point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
         //       color: Colors.blue.withOpacity(0.4),
         //       useRadiusInMeter: true,
         //       radius: (gRangeInKilometer * 1000)
         //   ),
         // ];
       }
-    }else{return [];}
-    return vTempMarker;
+      return markersTemp;
+    }
+    return [];
   }
 
 
@@ -432,8 +483,7 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
         temp2.add(new Marker(
           width: 30.0,
           height: 30.0,
-          point: new LatLng(gGeoPosition.userLocation.latitude,
-              gGeoPosition.userLocation.longitude),
+          point: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
           builder: (ctx) => new Container(
             child: Icon(
               MdiIcons.mapMarker,
@@ -504,19 +554,22 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     currentContext = context;
-    double buttonSize = ((MediaQuery.of(context).size.width-20)/4);
-    var list = gBusDataList.map((var value) {
+    // double buttonSize = ((MediaQuery.of(context).size.width-20)/4);
+
+    var list = lineListGlobal.map((var value) {
       return new DropdownMenuItem<String>(
-        value: value.busId,
+        // value: value.id,
+        value: value.id,
         child: new ListTile(
           leading: new CircleAvatar(
               foregroundColor: Colors.white,
-              backgroundColor: (value.busId == gMyBusId)?Colors.red:Colors.blue,
-              child: new Text(value.busId)),
-          title: Text(value.busName),
+              backgroundColor: (value.id == gMyBusId) ? Colors.red:Colors.blue,
+              child: new Text(value.id)),
+          title: Text(value.id),
         ),
       );
     }).toList();
+
     list.add(new DropdownMenuItem<String>(
       value: 'Off',
       child: new Text(AppLocalizations.of(context).translate('off'),
@@ -536,132 +589,154 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 
 
         : Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
+      body: Column(
           children: [
-
-            Padding(
-              padding: EdgeInsets.only(top: 4.0, bottom: 4.0),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-
-
-
-                  // Start journey button
-                  new SizedBox(
-                    width: buttonSize,
-                    child: RaisedButton(
-                      child:(gMyBusId == null) ? Text(AppLocalizations.of(context).translate('map_btn_start_journey')) : Text(gMyBusId), // Start journey
-                      highlightColor: gMyBusId == null ? Color(0xFF42A5F5) : Colors.redAccent,
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(color: gMyBusId == null ? Colors.blue : Colors.red)),
-                      textColor: gMyBusId == null ? Colors.blue : Colors.red,
-                      color: Colors.white70,
-                      onPressed: () {
-                        if(gMyBusId==null)
-                          tabController.animateTo(0);
-                      },
+            // Az oszlop modul első
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                // A sor modul első eleme.
+                DropdownButton(
+                    value: dropdownValue,
+                    items: [
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_start_journey'),
+                        ),
+                        value: 1,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_bus')),
+                        value: 2,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_lines')),
+                        value: 3,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_center')),
+                        value: 4,
+                      )
+                    ],
+                    icon: Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
                     ),
-                  ),
-
-
-
-                  // Buses button
-                  new SizedBox(
-                    width: buttonSize,
-                    // Buses button
-                    child: RaisedButton(
-                      autofocus: true,
-                      child: Text(AppLocalizations.of(context).translate('map_btn_bus').toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                        ),),
-                      highlightColor: Color(0xFF42A5F5),
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(color: toggleBus ? Colors.white : Colors.blue)),
-                      textColor: toggleBus ? Colors.white : Colors.blue,
-                      color: toggleBus ? Colors.blue : Colors.white70,
-                      onPressed: () {
-                        setState(() {
+                    onChanged: (value) {
+                      setState(() {
+                        if(value == 1){
+                          if(gMyBusId == null)
+                            tabController.animateTo(0);
+                        }
+                        if(value == 2){
                           selectedLayer = 0;
                           toggleBus = true;
                           toggleLine = false;
                           toggleStation = false;
-                        },);},),),
-
-
-
-                  // Lines button
-                  // A box with a specified size.
-                  new SizedBox(
-                    width: buttonSize,
-                    // Lines button.
-                    child: RaisedButton(
-
-                      child: Text(AppLocalizations.of(context).translate('map_btn_lines').toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      highlightColor: Color(0xFF42A5F5),
-
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(color: toggleLine ? Colors.white : Colors.blue)),
-
-                      textColor: toggleLine ? Colors.white : Colors.blue,
-                      color: toggleLine ? Colors.blue : Colors.white70,
-                      onPressed: () {
-                        setState(() {
+                        }
+                        if(value == 3){
                           selectedLayer = 1;
                           toggleBus = false;
                           toggleLine = true;
                           toggleStation = false;
-                        },);},),),
+                        }
+                        if(value == 4){
+                          var bounds = LatLngBounds();
+                          bounds.extend(
+                            new LatLng(gGeoPosition.userLocation.latitude,
+                                gGeoPosition.userLocation.longitude),
+                          );
+                          mapController.fitBounds(
+                            bounds,
+                            options: FitBoundsOptions(
+                              padding:
+                              EdgeInsets.only(left: 15.0, right: 15.0),
+                            ),);
+                          value = dropdownValue;
+                        }
+                        dropdownValue = value;
+                      });
+                    },
+                  ),
 
-
-
-                  // Center button
-                  new SizedBox(
-                    width: buttonSize,
-                    child: RaisedButton(
-                      child: Text(AppLocalizations.of(context).translate('map_btn_center')),
-                      highlightColor: Color(0xFF42A5F5),
-
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(180.0),
-                          side: BorderSide(color: Colors.blue)),
-
-                      textColor: Colors.blue,
-                      color: Colors.white70,
-
-                      onPressed: () {
-                        var bounds = LatLngBounds();
-                        bounds.extend(
-                          new LatLng(gGeoPosition.userLocation.latitude,
-                              gGeoPosition.userLocation.longitude),
-                        );
-                        mapController.fitBounds(
-                          bounds,
-                          options: FitBoundsOptions(
-                            padding:
-                            EdgeInsets.only(left: 15.0, right: 15.0),
-                          ),);},),),
-                ],
-              ),
+                // A sor modul második eleme.
+                // TODO: Itt ki kell lehessen választani az adott vonal irányát.
+                Visibility(
+                  child: DropdownButton(
+                    value: dropdownValue,
+                    items: [
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_start_journey'),
+                        ),
+                        value: 1,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_bus')),
+                        value: 2,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_lines')),
+                        value: 3,
+                      ),
+                      DropdownMenuItem(
+                        child: Text(AppLocalizations.of(context).translate('map_btn_center')),
+                        value: 4,
+                      )
+                    ],
+                    icon: Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        if(value == 1){
+                          if(gMyBusId == null)
+                            tabController.animateTo(0);
+                        }
+                        if(value == 2){
+                          selectedLayer = 0;
+                          toggleBus = true;
+                          toggleLine = false;
+                          toggleStation = false;
+                        }
+                        if(value == 3){
+                          selectedLayer = 1;
+                          toggleBus = false;
+                          toggleLine = true;
+                          toggleStation = false;
+                        }
+                        if(value == 4){
+                          var bounds = LatLngBounds();
+                          bounds.extend(
+                            new LatLng(gGeoPosition.userLocation.latitude,
+                                gGeoPosition.userLocation.longitude),
+                          );
+                          mapController.fitBounds(
+                            bounds,
+                            options: FitBoundsOptions(
+                              padding:
+                              EdgeInsets.only(left: 15.0, right: 15.0),
+                            ),);
+                          value = dropdownValue;
+                        }
+                        dropdownValue = value;
+                      });
+                    },
+                  ),
+                    visible: toggleLine == true ? true : false
+                ),
+              ],
             ),
 
 
-            // Child: dropdown list
+            // Lenyíló lista: Alapértelmezett: Kikapcsolva
             Visibility(
               child:new DropdownButton<String>(
                 isExpanded: true,
@@ -675,35 +750,17 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
                       selectedBusId = newVal;
                     }},);},),
 
-              visible: toggleBus,
+              visible: toggleBus || toggleLine,
             ),
 
 
-            // Child: dropdown list
-            Visibility(
-              child:new DropdownButton<String>(
-                isExpanded: true,
-                value: selectedBusId == "Off" ? 'Off' : selectedBusId,
-                items: list.reversed.toList(),
-                onChanged: (newVal) {
-                  setState(() {
-                    if (newVal == 'Off') {
-                      selectedBusId = "Off";
-                    } else {
-                      selectedBusId = newVal;
-                    }},);},),
-
-              visible: toggleLine,
-            ),
-
-
-            // Map child
+            // Gyermek modul: Térkép
             Flexible(
               child: FlutterMap(
                 mapController: mapController,
                 options: new MapOptions(
-                  center: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
-                  // center: new LatLng(46.53, 24.56),
+                  // center: new LatLng(gGeoPosition.userLocation.latitude, gGeoPosition.userLocation.longitude),
+                  center: new LatLng(46.53, 24.56),
                   zoom: 18.0,
                 ),
 
@@ -719,11 +776,13 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
                     },),
                   switchLayers(),
                   filterStations(),
+                  permanentMarkers()
                   // filterBuses(),
-                ],),),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
     );
   }
 }

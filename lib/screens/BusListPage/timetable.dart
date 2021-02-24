@@ -21,9 +21,9 @@ class TimetableScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     currentContext = context;
-    actualTimetable1 = new List<Timetable>.from(gTimetable);
+    actualTimetable1 = new List<Timetable>.from(timetableListGlobal);
     actualTimetable1.retainWhere((Timetable t) {
-      if (t.busNr == busId) {
+      if (t.lineId == busId) {
         return true;
       } else {
         return false;
@@ -83,7 +83,7 @@ class TimetableScreen extends StatelessWidget {
                   children: <Widget>[
                     Text(gStationList.firstWhere((Station s) {
                       // ignore: unrelated_type_equality_checks
-                      if (s.stationId == actualTimetable1.elementAt(0).stationID)
+                      if (s.id == actualTimetable1.elementAt(0).stationID)
                         return true;
                       return false;
                     }).stationName,
@@ -100,7 +100,7 @@ class TimetableScreen extends StatelessWidget {
                   children: <Widget>[
                     Text(gStationList.firstWhere((Station s) {
                       // ignore: unrelated_type_equality_checks
-                      if (s.stationId == actualTimetable2.elementAt(0).stationID)
+                      if (s.id == actualTimetable2.elementAt(0).stationID)
                         return true;
                       return false;
                     }).stationName,

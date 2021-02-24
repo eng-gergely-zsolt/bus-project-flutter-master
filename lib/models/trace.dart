@@ -1,19 +1,23 @@
 class Point{
   double latitude;
   double longitude;
+  int direction;
+  int orderNumber;
 
-  Point({this.latitude, this.longitude});
+  Point({this.latitude, this.longitude, this.direction, this.orderNumber});
 
   factory Point.fromJson(Map<String, dynamic> json){
     return new Point(
-        latitude: json['Latitude'],
-        longitude: json['Longitude']
+        latitude: json['latitude'],
+        longitude: json['longitude'],
+        direction: json['direction'],
+        orderNumber: json['order_number']
     );
   }
 
   @override
   String toString() {
-    return longitude.toString()+"  "+latitude.toString();
+    return longitude.toString() + "  " + latitude.toString();
   }
 }
 
@@ -27,11 +31,11 @@ class Trace{
 
   factory Trace.fromJson(Map<String, dynamic> json){
     List<Point> vPointList = new List<Point>();
-    for(int i=0;i<json['Points'].length;i++){
-      vPointList.add(Point.fromJson(json['Points'].elementAt(i)));
+    for(int i=0;i<json['LineTraceData'].length;i++){
+      vPointList.add(Point.fromJson(json['LineTraceData'].elementAt(i)));
     }
     return new Trace(
-        lineId: json['BusId'],
+        lineId: json['line_id'],
         pointList: vPointList
     );
   }
@@ -46,15 +50,15 @@ class Trace{
 
 
 
-class PostBusTraceList {
+class PostLineTraceList {
   final List<Trace> traceList;
 
-  PostBusTraceList({
+  PostLineTraceList({
     this.traceList,
   });
 
 
-  factory PostBusTraceList.fromJson(List<dynamic> parsedJson) {
+  factory PostLineTraceList.fromJson(List<dynamic> parsedJson) {
 
     List<Trace> vTraceList = new List<Trace>();
     for(int i=0;i<parsedJson.length;i++){
@@ -63,7 +67,7 @@ class PostBusTraceList {
 
     //buses = parsedJson.map((i) => Bus.fromJson(i)).toList();
 
-    return new PostBusTraceList(
+    return new PostLineTraceList(
       traceList: vTraceList,
     );
   }

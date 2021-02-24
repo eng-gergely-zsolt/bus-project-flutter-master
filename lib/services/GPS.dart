@@ -46,8 +46,8 @@ class GPS {
       List<Station> nearbyStations = new List<Station>.from(gStationList);
 
       bool detected = false;
-      print("nearbyStations before retainWhere");
-      print(nearbyStations);
+      // print("nearbyStations before retainWhere");
+      // print(nearbyStations);
 
       double min = 100.0;
       String vStationName = "";
@@ -73,9 +73,9 @@ class GPS {
       if (detected) {
         gNearStation = true;
         gStationText = AppLocalizations.of(currentContext).translate('gps_you_are_at') + vStationName; // You are at
-        getArrivalTimeList(int.parse(nearbyStations.first.stationId)).then((val) => gArrivalTimeList = val.arrivalTimeList);
-        print("gArrivalTimeList: ");
-        print(gArrivalTimeList);
+        getArrivalTimeList(int.parse(nearbyStations.first.stationName)).then((val) => gArrivalTimeList = val.arrivalTimeList);
+        // print("gArrivalTimeList: ");
+        // print(gArrivalTimeList);
       } else {
         gNearStation = false;
         gStationText = AppLocalizations.of(currentContext).translate('settings_no_station'); // No stations nearby
@@ -153,7 +153,6 @@ class GPS {
   }
 
   void _showQuestion() {
-    // flutter defined function
     if (gMyBusId != null)
       showDialog(
         barrierDismissible: false,

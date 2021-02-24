@@ -1,21 +1,18 @@
 class Bus {
-  String busId;
-  String busName;
+  String id;
+  String lineId;
 
-  Bus({this.busId, this.busName});
+  Bus({this.id, this.lineId});
 
   factory Bus.fromJson(Map<String, dynamic> json) {
     return new Bus(
-        busId: json['BusId'].toString(),
-        busName: json['BusName'].toString());
+        id: json['id'].toString(),
+        lineId: json['line_id'].toString());
   }
 
   @override
   String toString() {
-    return busName +
-        " Id: " +
-        busId +
-        "\n";
+    return lineId + " id: " + id + "\n";
   }
 }
 

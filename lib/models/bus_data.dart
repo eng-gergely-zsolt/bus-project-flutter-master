@@ -1,55 +1,63 @@
-class BusInformation {
+class BusData {
   String busId;
-  double actualLatitude;
-  double actualLongitude;
+  String courseId;
+  String lineId;
+  int direction;
+  double latitude;
+  double longitude;
   String measurementTimestamp;
-  int pointsNearby;
+  int pointsNearby = null;
 
-  BusInformation(
-      {this.busId,
-        this.actualLatitude,
-        this.actualLongitude,
-        this.measurementTimestamp,
-        this.pointsNearby});
+  BusData({
+    this.busId,
+    this.courseId,
+    this.lineId,
+    this.direction,
+    this.latitude,
+    this.longitude,
+    this.measurementTimestamp,
+    // this.pointsNearby
+  });
 
-  factory BusInformation.fromJson(Map<String, dynamic> json) {
-    return new BusInformation(
+  factory BusData.fromJson(Map<String, dynamic> json) {
+    return new BusData(
         busId: json['BusId'].toString(),
-        actualLatitude: json['Actual_Latitude'].toDouble(),
-        actualLongitude: json['Actual_Longitude'].toDouble(),
+        courseId: json['CourseId'].toString(),
+        lineId: json['LineId'].toString(),
+        direction: json['Direction'],
+        latitude: json['Latitude'].toDouble(),
+        longitude: json['Longitude'].toDouble(),
         measurementTimestamp: json['Measurement_Timestamp'].toString(),
-        pointsNearby: json['Points_nearby']
+        // pointsNearby: json['Points_nearby']
     );
   }
 
   @override
   String toString() {
     return busId +
-        " Latitude: " +
-        actualLatitude.toString() +
-        " Longitude: " +
-        actualLongitude.toString();
+        " Latitude: " + latitude.toString() +
+        " Longitude: " + longitude.toString();
   }
 }
 
 
 
-class BusInformationListPost {
-  final List<BusInformation> busList;
+class BusDataListPost {
+  final List<BusData> busList;
 
-  BusInformationListPost({
+  BusDataListPost({
     this.busList,
   });
 
 
-  factory BusInformationListPost.fromJson(List<dynamic> parsedJson) {
-    List<BusInformation> buses = new List<BusInformation>();
+  factory BusDataListPost.fromJson(List<dynamic> parsedJson) {
+    List<BusData> buses = new List<BusData>();
     for (int i = 0; i < parsedJson.length; i++) {
-      buses.add(BusInformation.fromJson(parsedJson.elementAt(i)));
+      buses.add(BusData.fromJson(parsedJson.elementAt(i)));
     }
 
 
-    return new BusInformationListPost(
+    return new BusDataListPost(
       busList: buses,
     );
   }

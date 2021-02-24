@@ -1,17 +1,17 @@
 class Station {
-  String stationId;
+  String id;
   String stationName;
   double latitude;
   double longitude;
 
-  Station({this.stationId, this.stationName, this.latitude, this.longitude});
+  Station({this.id, this.stationName, this.latitude, this.longitude});
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return new Station(
-        stationId: json['StationId'].toString(),
-        stationName: json['StationName'].toString(),
-        latitude: json['Latitude'].toDouble(),
-        longitude: json['Longitude'].toDouble());
+        id: json['id'].toString(),
+        stationName: json['station_name'].toString(),
+        latitude: json['latitude'].toDouble(),
+        longitude: json['longitude'].toDouble());
   }
 
   @override

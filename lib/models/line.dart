@@ -1,44 +1,27 @@
-class Entry{
-  int stationId;
-  int stationNr;
+class Line {
+  String id;
+  String routeName;
+  int startStationId;
+  String startStationName;
+  int endStationId;
+  String endStationName;
 
-  Entry({this.stationId,this.stationNr});
+  Line({this.id, this.routeName, this.startStationId, this.startStationName, this.endStationId, this.endStationName});
 
-  factory Entry.fromJson(Map<String, dynamic> json){
-    return new Entry(
-        stationId: json['StationID'],
-        stationNr: json['StationNr']
-    );
-  }
-
-  @override
-  String toString() {
-    return stationId.toString()+"  "+stationNr.toString();
-  }
-}
-
-
-
-class Line{
-  String lineId;
-  List<Entry> stationList;
-
-  Line({this.lineId,this.stationList});
-
-  factory Line.fromJson(Map<String, dynamic> json){
-    List<Entry> vEntryList = new List<Entry>();
-    for(int i=0;i<json['Stations'].length;i++){
-      vEntryList.add(Entry.fromJson(json['Stations'].elementAt(i)));
-    }
+  factory Line.fromJson(Map<String, dynamic> json) {
     return new Line(
-        lineId: json['LineID'],
-        stationList: vEntryList
+      endStationId: json['endStationId'],
+      endStationName: json['endStationName'],
+      id: json['id'].toString(),
+      routeName: json['routeName'],
+      startStationId: json['startStationId'],
+      startStationName: json['startStationName'],
     );
   }
 
   @override
   String toString() {
-    return lineId.toString()+"  "+stationList.toString();
+    return id + ' ' + routeName + ' ' + startStationId.toString() + ' ' + startStationName + ' ' + endStationId.toString() + ' ' + endStationName +  "\n";
   }
 }
 
@@ -51,16 +34,15 @@ class PostLineList {
     this.lineList,
   });
 
-
   factory PostLineList.fromJson(List<dynamic> parsedJson) {
-    List<Line> vLineList = new List<Line>();
-    for(int i=0;i<parsedJson.length;i++){
-      vLineList.add(Line.fromJson(parsedJson.elementAt(i)));
+    List<Line> lineListTemp = new List<Line>();
+
+    for (int i = 0; i < parsedJson.length; i++) {
+      lineListTemp.add(Line.fromJson(parsedJson.elementAt(i)));
     }
 
     return new PostLineList(
-      lineList: vLineList,
+        lineList: lineListTemp,
     );
   }
-
 }
