@@ -4,7 +4,7 @@ import 'package:bus_project/models/bus.dart';
 import 'package:bus_project/models/trace.dart';
 import 'package:http/http.dart' as http;
 import 'package:bus_project/models/arrival_time.dart';
-import 'package:bus_project/models/bus_data.dart';
+import 'package:bus_project/models/course_data.dart';
 import 'package:bus_project/models/station_on_line.dart';
 import 'package:bus_project/models/station.dart';
 import 'package:bus_project/models/timetable.dart';

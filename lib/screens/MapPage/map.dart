@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:bus_project/assets/icon/bus_icons.dart';
 import 'package:bus_project/models/station_on_line.dart';
 import 'package:bus_project/models/station.dart';
 import 'package:bus_project/models/timetable.dart';
@@ -14,7 +15,7 @@ import 'package:bus_project/services/communication.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import '../Shared/list.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:bus_project/models/bus_data.dart';
+import 'package:bus_project/models/course_data.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "dart:math" show pi;
 import "dart:math" show sin;
@@ -315,7 +316,7 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
 
           try{
             BusDataListPost temp = await getBusDataList();
-            gBusList = temp.busList;
+            courseDataGlobal = temp.busList;
           }catch(error){
             print('Caught error: $error');
           }
@@ -383,24 +384,22 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
   List<Marker> updateMarkers() {
 
     // Ha a felhasználó kiválaszt egy buszt.
-    if(selectedBusId != 'Off' && gBusList != null && gBusList.length != 0) {
-
-      print('FAAAAAAAAAASZ');
-      print(gBusList.length);
+    print(courseDataGlobal == null);
+    if(selectedBusId != 'Off' && courseDataGlobal != null && courseDataGlobal.length != 0) {
 
       List<Marker> markersTemp = List<Marker>();
 
-      List<BusData> busList = gBusList.map((e) => e).toList();
+      List<CourseData> busList = courseDataGlobal.map((e) => e).toList();
       busList.removeWhere((element) => element.lineId != selectedBusId);
 
       // Csak az egyik irányba közlekedő buszok.
-      List<BusData> busListOnDirection = busList.map((e) => e).toList();
+      List<CourseData> busListOnDirection = busList.map((e) => e).toList();
       busListOnDirection.removeWhere((element) => element.direction != userOnBus.direction);
 
 
       // Ha a felhasználó egy adott busszal utazik.
       if(userOnBus.lineId != '-1' && busListOnDirection.length != 0) {
-        List<BusData> busListTemp2 = busList.map((e) => e).toList();
+        List<CourseData> busListTemp2 = busList.map((e) => e).toList();
 
         // Az első busszal lévő távolságot beállítja minimumnak.
         double minDistance = 10000;
@@ -425,14 +424,13 @@ class MapsFlutter extends State<Map> with TickerProviderStateMixin {
         }
       }
 
+
       markersTemp = busList.map((e) {
         return Marker(
           point: new LatLng(e.latitude, e.longitude),
           builder: (ctx) => Container(
-            key: Key('purple'),
             child: new CircleAvatar(
                 foregroundColor: Colors.white,
-                backgroundColor: (e.pointsNearby != null) ? Colors.green : Colors.red,
                 child: new Text(e.lineId)),
           ),
         );

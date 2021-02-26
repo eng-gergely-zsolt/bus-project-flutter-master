@@ -21,14 +21,14 @@ class BusData {
 
   factory BusData.fromJson(Map<String, dynamic> json) {
     return new BusData(
-        busId: json['BusId'].toString(),
-        courseId: json['CourseId'].toString(),
-        lineId: json['LineId'].toString(),
-        direction: json['Direction'],
-        latitude: json['Latitude'].toDouble(),
-        longitude: json['Longitude'].toDouble(),
-        measurementTimestamp: json['Measurement_Timestamp'].toString(),
-        // pointsNearby: json['Points_nearby']
+      busId: json['BusId'].toString(),
+      courseId: json['CourseId'].toString(),
+      lineId: json['LineId'].toString(),
+      direction: json['Direction'],
+      latitude: json['Latitude'].toDouble(),
+      longitude: json['Longitude'].toDouble(),
+      measurementTimestamp: json['Measurement_Timestamp'].toString(),
+      // pointsNearby: json['Points_nearby']
     );
   }
 

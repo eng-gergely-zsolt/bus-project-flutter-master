@@ -1,5 +1,6 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:bus_project/models/bus_data.dart';
+import 'package:bus_project/models/course_data.dart';
 import 'package:bus_project/models/bus.dart';
 import 'package:bus_project/models/station_on_line.dart';
 import 'package:bus_project/models/line.dart';
@@ -39,10 +40,10 @@ class _BusListActionListener extends State<BusList1> {
 
 
     // Ha épp nem közlekednek buszok, akkor ez a lista üres lesz.
-    if (gBusList == null) {
+    if (courseDataGlobal == null) {
       getBusDataList().then((val) =>
           setState(() {
-            gBusList = val.busList;
+            courseDataGlobal = val.busList;
           }));
     }
 
